@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using OptimizelySDK;
 
@@ -20,6 +21,6 @@ public class LoggerAdapter : OptimizelySDK.Logger.ILogger
         OptimizelySDK.Logger.LogLevel.INFO => LogLevel.Information,
         OptimizelySDK.Logger.LogLevel.WARN => LogLevel.Warning,
         OptimizelySDK.Logger.LogLevel.ERROR => LogLevel.Error,
-        _ => throw new NotImplementedException()
+        _ => throw new InvalidEnumArgumentException(nameof(level), (int)level, typeof(OptimizelySDK.Logger.LogLevel))
     };
 }

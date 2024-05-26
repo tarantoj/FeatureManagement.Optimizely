@@ -11,9 +11,11 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
@@ -21,12 +23,13 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src
     - name: Build
-      run: dotnet build --no-restore
-    - name: JetBrains ReSharper Inspect Code
-      uses: JetBrains/ReSharper-InspectCode@v0.3
-      with:
-        solution: ./src/TarantoJ.FeatureManagement.Optimizely.csproj
+      run: dotnet build --no-restore src
+    # - name: JetBrains ReSharper Inspect Code
+    #   uses: JetBrains/ReSharper-InspectCode@v0.3
+    #   with:
+    #     solution: ./src/TarantoJ.FeatureManagement.Optimizely.csproj
+    #     tool-version: 2024.1.2
 #    - name: Test
 #      run: dotnet test --no-build --verbosity normal

@@ -28,6 +28,6 @@ jobs:
       uses: JetBrains/ReSharper-InspectCode@v0.3
       with:
         solution: ./src/TarantoJ.FeatureManagement.Optimizely.csproj
-        version: 2024.1.2
+        tool-version: 2024.1.2
 #    - name: Test
 #      run: dotnet test --no-build --verbosity normal

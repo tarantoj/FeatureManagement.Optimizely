@@ -16,10 +16,10 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<ILogger, LoggerAdapter>();
 
-        services.AddSingleton<IOptimizely>((x) =>
+        services.AddSingleton<IOptimizely>((serviceProvider) =>
         {
-            var options = x.GetRequiredService<OptimizelyOptions>();
-            var logger = x.GetRequiredService<ILogger>();
+            var options = serviceProvider.GetRequiredService<OptimizelyOptions>();
+            var logger = serviceProvider.GetRequiredService<ILogger>();
 
             OptimizelyFactory.SetLogger(logger);
             return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
@@ -28,5 +28,6 @@ public static class ServiceCollectionExtensions
         return services.AddSingleton<IFeatureDefinitionProvider, OptimizelyFeatureDefinitionProvider>();
     }
 
-    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features) => features.AddFeatureFilter<OptimizelyFeatureFilter>();
+    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features) =>
+      features.AddFeatureFilter<OptimizelyFeatureFilter>();
 }

@@ -13,7 +13,8 @@ public class LoggerAdapter : OptimizelySDK.Logger.ILogger
         _logger = logger;
     }
 
-    public void Log(OptimizelySDK.Logger.LogLevel level, string message) => _logger.Log(MapLogLevel(level), message);
+    public void Log(OptimizelySDK.Logger.LogLevel level, string message) =>
+      _logger.Log(MapLogLevel(level), message);
 
     private static LogLevel MapLogLevel(OptimizelySDK.Logger.LogLevel level) => level switch
     {
@@ -21,6 +22,9 @@ public class LoggerAdapter : OptimizelySDK.Logger.ILogger
         OptimizelySDK.Logger.LogLevel.INFO => LogLevel.Information,
         OptimizelySDK.Logger.LogLevel.WARN => LogLevel.Warning,
         OptimizelySDK.Logger.LogLevel.ERROR => LogLevel.Error,
-        _ => throw new InvalidEnumArgumentException(nameof(level), (int)level, typeof(OptimizelySDK.Logger.LogLevel))
+        _ => throw new InvalidEnumArgumentException(
+            nameof(level),
+            (int)level,
+            typeof(OptimizelySDK.Logger.LogLevel))
     };
 }

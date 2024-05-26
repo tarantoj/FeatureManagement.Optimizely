@@ -28,8 +28,5 @@ public static class ServiceCollectionExtensions
         return services.AddSingleton<IFeatureDefinitionProvider, OptimizelyFeatureDefinitionProvider>();
     }
 
-    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features)
-    {
-        return features.AddFeatureFilter<OptimizelyFeatureFilter>();
-    }
+    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features) => features.AddFeatureFilter<OptimizelyFeatureFilter>();
 }

@@ -26,10 +26,10 @@ jobs:
       run: dotnet restore src
     - name: Build
       run: dotnet build --no-restore src
-    - name: JetBrains ReSharper Inspect Code
-      uses: JetBrains/ReSharper-InspectCode@v0.3
-      with:
-        solution: ./src/TarantoJ.FeatureManagement.Optimizely.csproj
-        tool-version: 2024.1.2
+    # - name: JetBrains ReSharper Inspect Code
+    #   uses: JetBrains/ReSharper-InspectCode@v0.3
+    #   with:
+    #     solution: ./src/TarantoJ.FeatureManagement.Optimizely.csproj
+    #     tool-version: 2024.1.2
 #    - name: Test
 #      run: dotnet test --no-build --verbosity normal

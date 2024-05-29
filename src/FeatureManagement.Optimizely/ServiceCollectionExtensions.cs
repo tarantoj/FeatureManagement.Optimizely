@@ -5,6 +5,9 @@ using OptimizelySDK.Logger;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
+/// <summary>
+/// Extensions used to add Optimizely feature management functionality
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>

@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the Optimizely <see cref="IFeatureFilter"/>, must be registered after <see cref="IServiceCollection.AddFeatureManagement"/>
+    /// Registers the Optimizely <see cref="IFeatureFilter"/>, must be registered after <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement"/>
     /// </summary>
     public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features) =>
       features.AddFeatureFilter<OptimizelyFeatureFilter>();

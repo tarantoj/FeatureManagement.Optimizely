@@ -3,17 +3,26 @@ using OptimizelySDK;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
+/// <summary>
+/// [TODO:description]
+/// </summary>
 public class LoggerAdapter : OptimizelySDK.Logger.ILogger
 {
-    private readonly ILogger<IOptimizely> _logger;
+    private readonly ILogger<IOptimizely>? _logger;
 
-    public LoggerAdapter(ILogger<IOptimizely> logger)
+    /// <summary>
+    /// [TODO:description]
+    /// </summary>
+    /// <param name="logger">[TODO:parameter]</param>
+    /// <returns>[TODO:return]</returns>
+    public LoggerAdapter(ILogger<IOptimizely>? logger)
     {
         _logger = logger;
     }
 
+    /// <inheritdoc/>
     public void Log(OptimizelySDK.Logger.LogLevel level, string message) =>
-      _logger.Log(MapLogLevel(level), message);
+      _logger?.Log(MapLogLevel(level), message);
 
     private static LogLevel MapLogLevel(OptimizelySDK.Logger.LogLevel level) => level switch
     {

@@ -19,9 +19,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IOptimizely>((serviceProvider) =>
         {
             var options = serviceProvider.GetRequiredService<OptimizelyOptions>();
-            var logger = serviceProvider.GetRequiredService<ILogger>();
 
-            OptimizelyFactory.SetLogger(logger);
+            if (options.Logging ?? true)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger>();
+                OptimizelyFactory.SetLogger(logger);
+            }
+
             return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
         });
 

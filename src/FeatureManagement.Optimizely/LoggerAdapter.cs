@@ -21,6 +21,6 @@ public class LoggerAdapter : OptimizelySDK.Logger.ILogger
         OptimizelySDK.Logger.LogLevel.INFO => LogLevel.Information,
         OptimizelySDK.Logger.LogLevel.WARN => LogLevel.Warning,
         OptimizelySDK.Logger.LogLevel.ERROR => LogLevel.Error,
-        _ => LogLevel.Debug
+        _ => LogLevel.None
     };
 }

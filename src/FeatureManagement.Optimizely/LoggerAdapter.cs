@@ -4,17 +4,16 @@ using OptimizelySDK;
 namespace TarantoJ.FeatureManagement.Optimizely;
 
 /// <summary>
-/// [TODO:description]
+/// An adapter between <see cref="OptimizelySDK.Logger"/> and <see cref="ILogger"/>
 /// </summary>
 public class LoggerAdapter : OptimizelySDK.Logger.ILogger
 {
     private readonly ILogger<IOptimizely>? _logger;
 
     /// <summary>
-    /// [TODO:description]
+    /// An adapter between <see cref="OptimizelySDK.Logger"/> and <see cref="ILogger"/>
     /// </summary>
-    /// <param name="logger">[TODO:parameter]</param>
-    /// <returns>[TODO:return]</returns>
+    /// <param name="logger">A logger instance</param>
     public LoggerAdapter(ILogger<IOptimizely>? logger)
     {
         _logger = logger;
@@ -22,7 +21,9 @@ public class LoggerAdapter : OptimizelySDK.Logger.ILogger
 
     /// <inheritdoc/>
     public void Log(OptimizelySDK.Logger.LogLevel level, string message) =>
+#pragma warning disable CA2254
       _logger?.Log(MapLogLevel(level), message);
+#pragma warning restore CA2254
 
     private static LogLevel MapLogLevel(OptimizelySDK.Logger.LogLevel level) => level switch
     {

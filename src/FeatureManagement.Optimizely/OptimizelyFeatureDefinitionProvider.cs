@@ -11,10 +11,10 @@ public class OptimizelyFeatureDefinitionProvider : IFeatureDefinitionProvider
     private readonly IOptimizely _optimizely;
 
     /// <summary>
-    /// [TODO:description]
+    /// OptimizelyFeatureDefinitionProvider
     /// </summary>
-    /// <param name="optimizely">[TODO:parameter]</param>
-    /// <returns>[TODO:return]</returns>
+    /// <param name="optimizely">An instance of Optimizely</param>
+    /// <returns>OptimizelyFeatureDefinitionProvider</returns>
     public OptimizelyFeatureDefinitionProvider(IOptimizely optimizely)
     {
         _optimizely = optimizely;
@@ -27,7 +27,7 @@ public class OptimizelyFeatureDefinitionProvider : IFeatureDefinitionProvider
             {
                 Name = feature.Key,
                 RequirementType = RequirementType.All,
-                EnabledFor = new FeatureFilterConfiguration[]
+                EnabledFor = new FeatureFilterConfiguration[1]
                     { OptimizelyFeatureFilter.Configuration }
             })
             .ToAsyncEnumerable();

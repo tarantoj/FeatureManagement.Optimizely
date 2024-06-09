@@ -11,9 +11,12 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the Optimizely <see cref="IFeatureDefinitionProvider"/>, must be called before <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement"/>.
+    /// Registers the Optimizely <see cref="IFeatureDefinitionProvider"/>,
+    /// must be called before <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement(IServiceCollection)"/>.
     /// </summary>
-    public static IServiceCollection AddOptimizelyFeatureDefinitionProvider(this IServiceCollection services, string configSectionPath = "Optimizely")
+    public static IServiceCollection AddOptimizelyFeatureDefinitionProvider(
+        this IServiceCollection services,
+        string configSectionPath = "Optimizely")
     {
         services.AddOptions<OptimizelyOptions>()
                 .BindConfiguration(configSectionPath)
@@ -39,7 +42,8 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the Optimizely <see cref="IFeatureFilter"/>, must be registered after <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement"/>
+    /// Registers the Optimizely <see cref="IFeatureFilter"/>,
+    /// must be registered after <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement(IServiceCollection)"/>
     /// </summary>
     public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features) =>
       features.AddFeatureFilter<OptimizelyFeatureFilter>();

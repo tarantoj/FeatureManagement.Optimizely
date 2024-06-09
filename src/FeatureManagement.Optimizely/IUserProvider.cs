@@ -3,13 +3,13 @@ using OptimizelySDK.Entity;
 namespace TarantoJ.FeatureManagement.Optimizely;
 
 /// <summary>
-/// [TODO:description]
+/// A provider of user information
 /// </summary>
 public interface IUserProvider
 {
     /// <summary>
-    /// [TODO:description]
+    /// Gets the current user
     /// </summary>
-    /// <returns>[TODO:return]</returns>
+    /// <returns>A unique user id with optional user attributes</returns>
     Task<(string userId, UserAttributes? userAttributes)> GetUser();
 }

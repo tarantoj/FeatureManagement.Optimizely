@@ -26,7 +26,8 @@ public class OptimizelyFeatureFilter : IFeatureFilter
     public OptimizelyFeatureFilter(
         IOptimizely optimizely,
         ILogger<OptimizelyFeatureFilter> logger,
-        IUserProvider userProvider)
+        IUserProvider userProvider
+    )
     {
         _optimizely = optimizely;
         _logger = logger;
@@ -42,10 +43,7 @@ public class OptimizelyFeatureFilter : IFeatureFilter
 
         var decision = userContext.Decide(context.FeatureName);
 
-        _logger.LogDebug(
-            "Feature {FeatureName} has decision {@Decision}",
-            context.FeatureName,
-            decision);
+        _logger.LogDebug("Feature {FeatureName} has decision {@Decision}", context.FeatureName, decision);
 
         return decision.Enabled;
     }

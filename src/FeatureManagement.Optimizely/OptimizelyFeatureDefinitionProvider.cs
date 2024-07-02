@@ -22,19 +22,17 @@ public class OptimizelyFeatureDefinitionProvider : IFeatureDefinitionProvider
 
     /// <inheritdoc/>
     public IAsyncEnumerable<FeatureDefinition> GetAllFeatureDefinitionsAsync() =>
-        _optimizely.GetOptimizelyConfig()
+        _optimizely
+            .GetOptimizelyConfig()
             .FeaturesMap.Values.Select(feature => new FeatureDefinition
             {
                 Name = feature.Key,
                 RequirementType = RequirementType.All,
-                EnabledFor = new FeatureFilterConfiguration[1]
-                    { OptimizelyFeatureFilter.Configuration }
+                EnabledFor = new FeatureFilterConfiguration[1] { OptimizelyFeatureFilter.Configuration }
             })
             .ToAsyncEnumerable();
 
     /// <inheritdoc/>
     public Task<FeatureDefinition> GetFeatureDefinitionAsync(string featureName) =>
-        GetAllFeatureDefinitionsAsync()
-            .SingleAsync(feature => feature.Name == featureName)
-            .AsTask();
+        GetAllFeatureDefinitionsAsync().SingleAsync(feature => feature.Name == featureName).AsTask();
 }

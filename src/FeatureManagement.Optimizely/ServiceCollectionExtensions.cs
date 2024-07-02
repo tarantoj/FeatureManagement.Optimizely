@@ -16,27 +16,31 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddOptimizelyFeatureDefinitionProvider(
         this IServiceCollection services,
-        string configSectionPath = "Optimizely")
+        string configSectionPath = "Optimizely"
+    )
     {
-        services.AddOptions<OptimizelyOptions>()
-                .BindConfiguration(configSectionPath)
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
+        services
+            .AddOptions<OptimizelyOptions>()
+            .BindConfiguration(configSectionPath)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         services.AddSingleton<ILogger, LoggerAdapter>();
 
-        services.AddSingleton<IOptimizely>((serviceProvider) =>
-        {
-            var options = serviceProvider.GetRequiredService<OptimizelyOptions>();
-
-            if (options.Logging)
+        services.AddSingleton<IOptimizely>(
+            (serviceProvider) =>
             {
-                var logger = serviceProvider.GetRequiredService<ILogger>();
-                OptimizelyFactory.SetLogger(logger);
-            }
+                var options = serviceProvider.GetRequiredService<OptimizelyOptions>();
 
-            return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
-        });
+                if (options.Logging)
+                {
+                    var logger = serviceProvider.GetRequiredService<ILogger>();
+                    OptimizelyFactory.SetLogger(logger);
+                }
+
+                return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
+            }
+        );
 
         return services.AddSingleton<IFeatureDefinitionProvider, OptimizelyFeatureDefinitionProvider>();
     }
@@ -45,6 +49,7 @@ public static class ServiceCollectionExtensions
     /// Registers the Optimizely <see cref="IFeatureFilter"/>,
     /// must be registered after <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement(IServiceCollection)"/>
     /// </summary>
-    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features) =>
-      features.AddFeatureFilter<OptimizelyFeatureFilter>();
+    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(
+        this IFeatureManagementBuilder features
+    ) => features.AddFeatureFilter<OptimizelyFeatureFilter>();
 }

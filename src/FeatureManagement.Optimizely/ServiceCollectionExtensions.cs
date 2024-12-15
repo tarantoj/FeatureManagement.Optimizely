@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
 using OptimizelySDK.Logger;
@@ -16,35 +17,40 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddOptimizelyFeatureDefinitionProvider(
         this IServiceCollection services,
-        string configSectionPath = "Optimizely")
+        Action<OptimizelyOptions> configureOptions
+    )
     {
-        services.AddOptions<OptimizelyOptions>()
-                .BindConfiguration(configSectionPath)
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
+        services.Configure(configureOptions);
 
         services.AddSingleton<ILogger, LoggerAdapter>();
 
-        services.AddSingleton<IOptimizely>((serviceProvider) =>
-        {
-            var options = serviceProvider.GetRequiredService<OptimizelyOptions>();
-
-            if (options.Logging)
+        services.AddSingleton<IOptimizely>(
+            (serviceProvider) =>
             {
-                var logger = serviceProvider.GetRequiredService<ILogger>();
-                OptimizelyFactory.SetLogger(logger);
+                var options = serviceProvider
+                    .GetRequiredService<IOptions<OptimizelyOptions>>()
+                    .Value;
+                if (options?.Logging ?? false)
+                {
+                    var logger = serviceProvider.GetRequiredService<LoggerAdapter>();
+                    OptimizelyFactory.SetLogger(logger);
+                }
+
+                return OptimizelyFactory.NewDefaultInstance(options?.SdkKey);
             }
+        );
 
-            return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
-        });
-
-        return services.AddSingleton<IFeatureDefinitionProvider, OptimizelyFeatureDefinitionProvider>();
+        return services.AddSingleton<
+            IFeatureDefinitionProvider,
+            OptimizelyFeatureDefinitionProvider
+        >();
     }
 
     /// <summary>
     /// Registers the Optimizely <see cref="IFeatureFilter"/>,
     /// must be registered after <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement(IServiceCollection)"/>
     /// </summary>
-    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(this IFeatureManagementBuilder features) =>
-      features.AddFeatureFilter<OptimizelyFeatureFilter>();
+    public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(
+        this IFeatureManagementBuilder features
+    ) => features.AddFeatureFilter<OptimizelyFeatureFilter>();
 }

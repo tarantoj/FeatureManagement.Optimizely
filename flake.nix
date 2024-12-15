@@ -11,12 +11,18 @@
     forEachSupportedSystem = f:
       nixpkgs.lib.genAttrs supportedSystems (system:
         f {
-          pkgs = import nixpkgs {inherit system;};
+          pkgs = import nixpkgs {
+            inherit system;
+
+            config.permittedInsecurePackages = [
+              "dotnet-sdk-6.0.428"
+            ];
+          };
         });
   in {
     devShells = forEachSupportedSystem ({pkgs}: {
       default = let
-        dotnet-combined = with pkgs.dotnetCorePackages; combinePackages [sdk_6_0 sdk_8_0];
+        dotnet-combined = with pkgs.dotnetCorePackages; combinePackages [sdk_6_0 sdk_8_0 sdk_9_0];
       in
         pkgs.mkShell {
           DOTNET_ROOT = "${dotnet-combined}";

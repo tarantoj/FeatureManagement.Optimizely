@@ -21,16 +21,17 @@ public class LoggerAdapter : OptimizelySDK.Logger.ILogger
 
     /// <inheritdoc/>
     public void Log(OptimizelySDK.Logger.LogLevel level, string message) =>
-#pragma warning disable CA2254
-      _logger?.Log(MapLogLevel(level), message);
-#pragma warning restore CA2254
+#pragma warning disable CA2254 // Template should be a static expression
+        _logger?.Log(MapLogLevel(level), message);
+#pragma warning restore CA2254 // Template should be a static expression
 
-    private static LogLevel MapLogLevel(OptimizelySDK.Logger.LogLevel level) => level switch
-    {
-        OptimizelySDK.Logger.LogLevel.DEBUG => LogLevel.Debug,
-        OptimizelySDK.Logger.LogLevel.INFO => LogLevel.Information,
-        OptimizelySDK.Logger.LogLevel.WARN => LogLevel.Warning,
-        OptimizelySDK.Logger.LogLevel.ERROR => LogLevel.Error,
-        _ => LogLevel.None
-    };
+    private static LogLevel MapLogLevel(OptimizelySDK.Logger.LogLevel level) =>
+        level switch
+        {
+            OptimizelySDK.Logger.LogLevel.DEBUG => LogLevel.Debug,
+            OptimizelySDK.Logger.LogLevel.INFO => LogLevel.Information,
+            OptimizelySDK.Logger.LogLevel.WARN => LogLevel.Warning,
+            OptimizelySDK.Logger.LogLevel.ERROR => LogLevel.Error,
+            _ => LogLevel.None,
+        };
 }

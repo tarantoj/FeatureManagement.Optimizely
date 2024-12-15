@@ -13,10 +13,6 @@
         f {
           pkgs = import nixpkgs {
             inherit system;
-
-            config.permittedInsecurePackages = [
-              "dotnet-sdk-6.0.428"
-            ];
           };
         });
   in {

@@ -6,29 +6,19 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 /// <summary>
 /// Optimizely feature definition provider
 /// </summary>
-public class OptimizelyFeatureDefinitionProvider : IFeatureDefinitionProvider
+/// <param name="optimizely">An instance of Optimizely</param>
+public class OptimizelyFeatureDefinitionProvider(IOptimizely optimizely)
+    : IFeatureDefinitionProvider
 {
-    private readonly IOptimizely _optimizely;
-
-    /// <summary>
-    /// OptimizelyFeatureDefinitionProvider
-    /// </summary>
-    /// <param name="optimizely">An instance of Optimizely</param>
-    /// <returns>OptimizelyFeatureDefinitionProvider</returns>
-    public OptimizelyFeatureDefinitionProvider(IOptimizely optimizely)
-    {
-        _optimizely = optimizely;
-    }
-
     /// <inheritdoc/>
     public IAsyncEnumerable<FeatureDefinition> GetAllFeatureDefinitionsAsync() =>
-        _optimizely.GetOptimizelyConfig()
+        optimizely
+            .GetOptimizelyConfig()
             .FeaturesMap.Values.Select(feature => new FeatureDefinition
             {
                 Name = feature.Key,
                 RequirementType = RequirementType.All,
-                EnabledFor = new FeatureFilterConfiguration[1]
-                    { OptimizelyFeatureFilter.Configuration }
+                EnabledFor = [OptimizelyFeatureFilter.Configuration],
             })
             .ToAsyncEnumerable();
 

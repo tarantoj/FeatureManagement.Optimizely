@@ -7,31 +7,22 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 /// <summary>
 /// A feature filter that can be used to activate features from Optimizely
 /// </summary>
+/// <param name="optimizely">An instance of Optimizely</param>
+/// <param name="logger">A logger instance</param>
+/// <param name="userProvider">An instance of <see cref="IUserProvider"/></param>
 [FilterAlias(Alias)]
-public class OptimizelyFeatureFilter : IFeatureFilter
+public class OptimizelyFeatureFilter(
+    IOptimizely optimizely,
+    ILogger<OptimizelyFeatureFilter> logger,
+    IUserProvider userProvider
+) : IFeatureFilter
 {
     internal const string Alias = "Optimizely";
     internal static readonly FeatureFilterConfiguration Configuration = new() { Name = Alias };
 
-    private readonly IOptimizely _optimizely;
-    private readonly ILogger<OptimizelyFeatureFilter> _logger;
-    private readonly IUserProvider _userProvider;
-
-    /// <summary>
-    /// Creates an Optimizely based feature filter
-    /// </summary>
-    /// <param name="optimizely">An instance of Optimizely</param>
-    /// <param name="logger">A logger instance</param>
-    /// <param name="userProvider">An instance of <see cref="IUserProvider"/></param>
-    public OptimizelyFeatureFilter(
-        IOptimizely optimizely,
-        ILogger<OptimizelyFeatureFilter> logger,
-        IUserProvider userProvider)
-    {
-        _optimizely = optimizely;
-        _logger = logger;
-        _userProvider = userProvider;
-    }
+    private readonly IOptimizely _optimizely = optimizely;
+    private readonly ILogger<OptimizelyFeatureFilter> _logger = logger;
+    private readonly IUserProvider _userProvider = userProvider;
 
     /// <inheritdoc/>
     public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
@@ -45,7 +36,8 @@ public class OptimizelyFeatureFilter : IFeatureFilter
         _logger.LogDebug(
             "Feature {FeatureName} has decision {@Decision}",
             context.FeatureName,
-            decision);
+            decision
+        );
 
         return decision.Enabled;
     }

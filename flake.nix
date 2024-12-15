@@ -22,11 +22,11 @@
   in {
     devShells = forEachSupportedSystem ({pkgs}: {
       default = let
-        dotnet-combined = with pkgs.dotnetCorePackages; combinePackages [sdk_6_0 sdk_8_0 sdk_9_0];
+        dotnet-combined = with pkgs.dotnetCorePackages; combinePackages [sdk_8_0 sdk_9_0];
       in
         pkgs.mkShell {
           DOTNET_ROOT = "${dotnet-combined}";
-          packages = with pkgs; [dotnet-combined];
+          packages = [dotnet-combined];
         };
     });
   };

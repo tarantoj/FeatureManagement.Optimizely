@@ -20,24 +20,16 @@ public class OptimizelyFeatureFilter(
     internal const string Alias = "Optimizely";
     internal static readonly FeatureFilterConfiguration Configuration = new() { Name = Alias };
 
-    private readonly IOptimizely _optimizely = optimizely;
-    private readonly ILogger<OptimizelyFeatureFilter> _logger = logger;
-    private readonly IUserProvider _userProvider = userProvider;
-
     /// <inheritdoc/>
     public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
     {
-        var (userId, userAttributes) = await _userProvider.GetUser();
+        var (userId, userAttributes) = await userProvider.GetUser();
 
-        var userContext = _optimizely.CreateUserContext(userId, userAttributes);
+        var userContext = optimizely.CreateUserContext(userId, userAttributes);
 
         var decision = userContext.Decide(context.FeatureName);
 
-        _logger.LogDebug(
-            "Feature {FeatureName} has decision {@Decision}",
-            context.FeatureName,
-            decision
-        );
+        logger.LogDecision(context.FeatureName, decision);
 
         return decision.Enabled;
     }

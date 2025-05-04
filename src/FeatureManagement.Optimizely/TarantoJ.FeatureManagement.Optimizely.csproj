@@ -13,7 +13,7 @@
     <PackageReference Include="microsoft.extensions.dependencyinjection" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.4" />
     <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.FeatureManagement" Version="4.0.0" />
     <PackageReference Include="Optimizely.SDK" Version="4.1.0" />

@@ -17,7 +17,7 @@ public class OptimizelyFeatureFilter(
     IUserProvider userProvider
 ) : IFeatureFilter
 {
-    internal const string Alias = "Optimizely";
+    private const string Alias = "Optimizely";
     internal static readonly FeatureFilterConfiguration Configuration = new() { Name = Alias };
 
     /// <inheritdoc/>

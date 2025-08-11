@@ -18,7 +18,7 @@
     <PackageReference Include="Microsoft.FeatureManagement" Version="4.2.1" />
     <PackageReference Include="Optimizely.SDK" Version="4.1.0" />
     <PackageReference Include="system.linq.async" Version="6.0.3" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.13.0.120203">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.15.0.120848">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.FeatureManagement;
 using OptimizelySDK.Entity;
@@ -51,6 +52,16 @@ public class OptimizelyFeatureFilterTests
         Assert.False(freeUser);
     }
 
+    [Fact]
+    public async Task EvaluateAsync_ReturnsFalseWhenUserIdIsNull()
+    {
+        var filter = CreateFilter(userId: null!);
+
+        var enabled = await filter.EvaluateAsync(Context("forced_feature"));
+
+        Assert.False(enabled);
+    }
+
     private static Task<bool> Evaluate(
         string userId,
         string feature,
@@ -60,12 +71,20 @@ public class OptimizelyFeatureFilterTests
     private static OptimizelyFeatureFilter CreateFilter(
         string userId,
         UserAttributes? attributes = null
-    ) =>
-        new(
-            TestDataFile.CreateOptimizely(),
-            NullLogger<OptimizelyFeatureFilter>.Instance,
+    )
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IUserProvider>(
             new FakeUserProvider { Result = (userId, attributes) }
         );
+        var serviceProvider = services.BuildServiceProvider();
+
+        return new OptimizelyFeatureFilter(
+            TestDataFile.CreateOptimizely(),
+            NullLogger<OptimizelyFeatureFilter>.Instance,
+            serviceProvider
+        );
+    }
 
     private static FeatureFilterEvaluationContext Context(string featureName) =>
         new() { FeatureName = featureName };

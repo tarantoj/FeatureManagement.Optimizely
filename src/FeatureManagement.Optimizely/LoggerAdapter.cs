@@ -13,9 +13,7 @@ public class LoggerAdapter(ILogger<IOptimizely>? logger) : OptimizelySDK.Logger.
 {
     /// <inheritdoc/>
     public void Log(OptimizelySDK.Logger.LogLevel level, string message) =>
-#pragma warning disable CA2254 // Template should be a static expression
-        logger?.Log(MapLogLevel(level), message);
-#pragma warning restore CA2254 // Template should be a static expression
+        logger?.Log(MapLogLevel(level), "{OptimizelyMessage}", message);
 
     private static LogLevel MapLogLevel(OptimizelySDK.Logger.LogLevel level) =>
         level switch

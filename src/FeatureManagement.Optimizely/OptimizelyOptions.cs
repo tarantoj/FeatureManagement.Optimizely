@@ -21,4 +21,10 @@ public class OptimizelyOptions
     /// enabled by default.
     /// </summary>
     public bool Logging { get; set; } = true;
+
+    /// <summary>
+    /// The user id used when evaluating features without a registered
+    /// <see cref="IUserProvider"/>.
+    /// </summary>
+    public string DefaultUserId { get; set; } = "anonymous-user";
 }

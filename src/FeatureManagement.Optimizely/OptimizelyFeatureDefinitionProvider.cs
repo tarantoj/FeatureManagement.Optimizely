@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
+using OptimizelySDK.OptlyConfig;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
@@ -13,20 +14,34 @@ public class OptimizelyFeatureDefinitionProvider(IOptimizely optimizely)
     : IFeatureDefinitionProvider
 {
     /// <inheritdoc/>
-    public IAsyncEnumerable<FeatureDefinition> GetAllFeatureDefinitionsAsync() =>
-        optimizely
-            .GetOptimizelyConfig()
-            .FeaturesMap.Values.Select(feature => new FeatureDefinition
-            {
-                Name = feature.Key,
-                RequirementType = RequirementType.All,
-                EnabledFor = [OptimizelyFeatureFilter.Configuration],
-            })
-            .ToAsyncEnumerable();
+    public IAsyncEnumerable<FeatureDefinition> GetAllFeatureDefinitionsAsync()
+    {
+        var config = optimizely.GetOptimizelyConfig();
+
+        return config is null
+            ? Array.Empty<FeatureDefinition>().ToAsyncEnumerable()
+            : config.FeaturesMap.Values.Select(ToDefinition).ToAsyncEnumerable();
+    }
 
     /// <inheritdoc/>
-    public Task<FeatureDefinition?> GetFeatureDefinitionAsync(string featureName) =>
-        GetAllFeatureDefinitionsAsync()
-            .FirstOrDefaultAsync(feature => feature.Name == featureName)
-            .AsTask();
+    public Task<FeatureDefinition?> GetFeatureDefinitionAsync(string featureName)
+    {
+        var config = optimizely.GetOptimizelyConfig();
+
+        FeatureDefinition? definition = null;
+        if (config is not null && config.FeaturesMap.TryGetValue(featureName, out var feature))
+        {
+            definition = ToDefinition(feature);
+        }
+
+        return Task.FromResult(definition);
+    }
+
+    private static FeatureDefinition ToDefinition(OptimizelyFeature feature) =>
+        new()
+        {
+            Name = feature.Key,
+            RequirementType = RequirementType.All,
+            EnabledFor = [OptimizelyFeatureFilter.Configuration],
+        };
 }

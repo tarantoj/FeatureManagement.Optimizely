@@ -13,8 +13,8 @@ public class OptimizelyFeatureDefinitionProviderTests
         var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
 
         Assert.Equal(
-            ["boolean_feature", "empty_feature", "premium_feature", "forced_feature"],
-            definitions.Select(d => d.Name)
+            ["boolean_feature", "empty_feature", "forced_feature", "premium_feature"],
+            definitions.Select(d => d.Name).OrderBy(name => name)
         );
         Assert.All(definitions, definition =>
         {
@@ -42,6 +42,30 @@ public class OptimizelyFeatureDefinitionProviderTests
         var provider = new OptimizelyFeatureDefinitionProvider(TestDataFile.CreateOptimizely());
 
         var definition = await provider.GetFeatureDefinitionAsync("unknown_feature");
+
+        Assert.Null(definition);
+    }
+
+    [Fact]
+    public async Task GetAllFeatureDefinitionsAsync_ReturnsEmptyWhenConfigIsUnavailable()
+    {
+        var provider = new OptimizelyFeatureDefinitionProvider(
+            new OptimizelySDK.Optimizely("not a datafile", skipJsonValidation: true)
+        );
+
+        var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
+
+        Assert.Empty(definitions);
+    }
+
+    [Fact]
+    public async Task GetFeatureDefinitionAsync_ReturnsNullWhenConfigIsUnavailable()
+    {
+        var provider = new OptimizelyFeatureDefinitionProvider(
+            new OptimizelySDK.Optimizely("not a datafile", skipJsonValidation: true)
+        );
+
+        var definition = await provider.GetFeatureDefinitionAsync("boolean_feature");
 
         Assert.Null(definition);
     }

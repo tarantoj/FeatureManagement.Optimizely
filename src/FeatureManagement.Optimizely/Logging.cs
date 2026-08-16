@@ -12,6 +12,12 @@ namespace TarantoJ.FeatureManagement.Optimizely
             [TagProvider(typeof(DecisionTagProvider), nameof(DecisionTagProvider.Decision))]
             OptimizelyDecision decision
         );
+
+        [LoggerMessage(
+            LogLevel.Warning,
+            "Could not create an Optimizely user context for user {userId}"
+        )]
+        internal static partial void LogInvalidUserId(this ILogger logger, string? userId);
     }
 
     internal static class DecisionTagProvider

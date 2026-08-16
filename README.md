@@ -61,8 +61,20 @@ builder.Services.AddOptimizelyFeatureDefinitionProvider<MyUserProvider>(options 
 });
 ```
 
+`IUserProvider` is resolved from a DI scope for every evaluation, so a scoped implementation can safely
+depend on request-scoped services (or on `IHttpContextAccessor` when it needs the current request).
+
 If your application always evaluates for the same user, you can use the non-generic overload and skip
-`IUserProvider`.
+`IUserProvider`; features are then evaluated for the configured `DefaultUserId`
+(`"anonymous-user"` by default):
+
+```csharp
+builder.Services.AddOptimizelyFeatureDefinitionProvider(options =>
+{
+    options.SdkKey = "your-sdk-key";
+    options.DefaultUserId = "shared-user";
+});
+```
 
 ## Usage
 

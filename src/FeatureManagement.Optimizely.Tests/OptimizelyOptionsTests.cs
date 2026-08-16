@@ -19,6 +19,10 @@ public class OptimizelyOptionsTests
     public void Logging_IsEnabledByDefault() =>
         Assert.True(new OptimizelyOptions().Logging);
 
+    [Fact]
+    public void DefaultUserId_IsAnonymousUserByDefault() =>
+        Assert.Equal("anonymous-user", new OptimizelyOptions().DefaultUserId);
+
     private static List<ValidationResult> Validate(object instance)
     {
         var results = new List<ValidationResult>();

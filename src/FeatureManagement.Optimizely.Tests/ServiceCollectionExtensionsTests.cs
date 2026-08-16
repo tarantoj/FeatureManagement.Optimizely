@@ -95,4 +95,68 @@ public class ServiceCollectionExtensionsTests
         Assert.True(await features.IsEnabledAsync("boolean_feature"));
         Assert.False(await features.IsEnabledAsync("empty_feature"));
     }
+
+    [Fact]
+    public async Task FeatureManagementPipeline_WithScopedUserProvider_PassesScopeValidation()
+    {
+        var services = new ServiceCollection();
+        services.AddOptimizelyFeatureDefinitionProvider<FakeUserProvider>(options =>
+            options.SdkKey = "test"
+        );
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddFeatureManagement().AddOptimizelyFeatureFilter();
+
+        await using var provider = services.BuildServiceProvider(
+            new ServiceProviderOptions { ValidateScopes = true, ValidateOnBuild = true }
+        );
+        var features = provider.GetRequiredService<IFeatureManager>();
+
+        Assert.True(await features.IsEnabledAsync("forced_feature"));
+    }
+
+    [Fact]
+    public async Task FeatureManagementPipeline_WithoutUserProvider_UsesDefaultUser()
+    {
+        var services = new ServiceCollection();
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddFeatureManagement().AddOptimizelyFeatureFilter();
+
+        await using var provider = services.BuildServiceProvider();
+        var features = provider.GetRequiredService<IFeatureManager>();
+
+        Assert.True(await features.IsEnabledAsync("forced_feature"));
+        Assert.False(await features.IsEnabledAsync("empty_feature"));
+    }
+
+    [Fact]
+    public async Task FeatureManagementPipeline_UsesConfiguredDefaultUser()
+    {
+        var services = new ServiceCollection();
+        services.AddOptimizelyFeatureDefinitionProvider(options =>
+        {
+            options.SdkKey = "test";
+            options.DefaultUserId = "user2";
+        });
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddFeatureManagement().AddOptimizelyFeatureFilter();
+
+        await using var provider = services.BuildServiceProvider();
+        var features = provider.GetRequiredService<IFeatureManager>();
+
+        Assert.False(await features.IsEnabledAsync("forced_feature"));
+    }
+
+    [Fact]
+    public void AddOptimizelyFeatureDefinitionProvider_EmptySdkKey_ThrowsWhenResolved()
+    {
+        var services = new ServiceCollection();
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = string.Empty);
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.Throws<OptionsValidationException>(
+            provider.GetRequiredService<IOptimizely>
+        );
+    }
 }

@@ -1,9 +1,15 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
-using OptimizelySDK.Logger;
+using OptimizelySDK.Config;
+using OptimizelySDK.ErrorHandler;
+using OptimizelySDK.Event;
+using OptimizelySDK.Event.Dispatcher;
+using OptimizelySDK.Notifications;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
@@ -22,6 +28,9 @@ public static class ServiceCollectionExtensions
         Action<OptimizelyOptions> configureOptions
     )
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configureOptions);
+
         return services.AddOptimizelyFeatureDefinitionProviderInternal(configureOptions);
     }
 
@@ -36,7 +45,10 @@ public static class ServiceCollectionExtensions
     )
         where TUserProvider : class, IUserProvider
     {
-        services.AddScoped<IUserProvider, TUserProvider>();
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configureOptions);
+
+        services.TryAddScoped<IUserProvider, TUserProvider>();
 
         return services.AddOptimizelyFeatureDefinitionProviderInternal(configureOptions);
     }
@@ -47,7 +59,12 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(
         this IFeatureManagementBuilder features
-    ) => features.AddFeatureFilter<OptimizelyFeatureFilter>();
+    )
+    {
+        ArgumentNullException.ThrowIfNull(features);
+
+        return features.AddFeatureFilter<OptimizelyFeatureFilter>();
+    }
 
     private static IServiceCollection AddOptimizelyFeatureDefinitionProviderInternal(
         this IServiceCollection services,
@@ -56,27 +73,73 @@ public static class ServiceCollectionExtensions
     {
         services.Configure(configureOptions);
 
-        services.AddSingleton<ILogger, LoggerAdapter>();
+        services
+            .AddOptions<OptimizelyOptions>()
+            .Validate(
+                options => !string.IsNullOrWhiteSpace(options.SdkKey),
+                $"{nameof(OptimizelyOptions.SdkKey)} must not be empty."
+            )
+            .ValidateOnStart();
 
-        services.AddSingleton<IOptimizely>(
+        services.TryAddSingleton<IUserProvider, DefaultUserProvider>();
+
+        services.TryAddSingleton<IOptimizely>(
             (serviceProvider) =>
             {
                 var options = serviceProvider
                     .GetRequiredService<IOptions<OptimizelyOptions>>()
                     .Value;
-                if (options.Logging)
-                {
-                    var logger = serviceProvider.GetRequiredService<LoggerAdapter>();
-                    OptimizelyFactory.SetLogger(logger);
-                }
 
-                return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
+                var microsoftLogger = options.Logging
+                    ? serviceProvider.GetService<ILogger<IOptimizely>>()
+                    : null;
+
+                var optimizelyLogger = microsoftLogger is null
+                    ? null
+                    : new LoggerAdapter(microsoftLogger);
+
+                return CreateOptimizely(options.SdkKey, optimizelyLogger);
             }
         );
 
-        return services.AddSingleton<
+        services.TryAddSingleton<
             IFeatureDefinitionProvider,
             OptimizelyFeatureDefinitionProvider
         >();
+
+        return services;
+    }
+
+    private static OptimizelySDK.Optimizely CreateOptimizely(
+        string sdkKey,
+        OptimizelySDK.Logger.ILogger? logger
+    )
+    {
+        var effectiveLogger = logger ?? new OptimizelySDK.Logger.NoOpLogger();
+        var notificationCenter = new NotificationCenter();
+        var errorHandler = new DefaultErrorHandler(effectiveLogger, false);
+        var eventDispatcher = new DefaultEventDispatcher(effectiveLogger);
+
+        var configManager = new HttpProjectConfigManager.Builder()
+            .WithSdkKey(sdkKey)
+            .WithLogger(effectiveLogger)
+            .WithErrorHandler(errorHandler)
+            .WithNotificationCenter(notificationCenter)
+            .Build(true);
+
+        var eventProcessor = new BatchEventProcessor.Builder()
+            .WithLogger(effectiveLogger)
+            .WithEventDispatcher(eventDispatcher)
+            .WithNotificationCenter(notificationCenter)
+            .Build();
+
+        return OptimizelyFactory.NewDefaultInstance(
+            configManager,
+            notificationCenter,
+            eventDispatcher,
+            errorHandler,
+            effectiveLogger,
+            eventProcessor: eventProcessor
+        );
     }
 }

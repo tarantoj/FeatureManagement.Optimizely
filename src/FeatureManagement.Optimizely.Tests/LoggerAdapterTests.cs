@@ -34,6 +34,19 @@ public class LoggerAdapterTests
 
         adapter.Log(OptimizelyLogLevel.WARN, "message");
     }
+
+    [Fact]
+    public void Log_MessageContainingBraces_DoesNotThrow()
+    {
+        var logger = new CapturingLogger<IOptimizely>();
+        var adapter = new LoggerAdapter(logger);
+        const string message = "message with {braces} and {0} placeholders";
+
+        adapter.Log(OptimizelyLogLevel.INFO, message);
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(message, entry.Message);
+    }
 }
 
 internal sealed class CapturingLogger<T> : ILogger<T>

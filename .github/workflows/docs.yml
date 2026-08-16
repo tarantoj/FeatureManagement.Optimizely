@@ -34,7 +34,6 @@ jobs:
           9.0.x
           10.0.x
           11.0.x
-        include-prerelease: true
 
     - run: dotnet tool restore
     - run: dotnet tool run docfx docs/docfx.json

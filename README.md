@@ -43,6 +43,33 @@ app.Run();
 `OptimizelyOptions.SdkKey` is required. `Logging` is enabled by default and forwards Optimizely log
 output to `ILogger`.
 
+### Configuration from appsettings.json
+
+Instead of hard-coding the options, bind `OptimizelyOptions` from your configuration:
+
+```json
+// appsettings.json
+{
+  "Optimizely": {
+    "SdkKey": "your-sdk-key",
+    "Logging": true,
+    "DefaultUserId": "anonymous-user"
+  }
+}
+```
+
+```csharp
+builder.Services.Configure<OptimizelyOptions>(
+    builder.Configuration.GetSection(OptimizelyOptions.SectionName));
+
+builder.Services.AddOptimizelyFeatureDefinitionProvider(_ => { });
+```
+
+`OptimizelyOptions.SectionName` (`"Optimizely"`) is a constant on the options type, so the section name
+stays in sync. Values set in the `Action` passed to `AddOptimizelyFeatureDefinitionProvider` are applied
+after configuration binding, so they take precedence over `appsettings.json`; you can mix both, for
+example by keeping `SdkKey` in configuration and overriding `DefaultUserId` in code.
+
 ## Provide the current user
 
 Optimizely needs to know which user is evaluating the feature so that audiences and targeting rules

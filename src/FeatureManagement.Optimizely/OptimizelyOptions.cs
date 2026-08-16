@@ -10,6 +10,11 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 public class OptimizelyOptions
 {
     /// <summary>
+    /// The configuration section name used to bind <see cref="OptimizelyOptions"/>.
+    /// </summary>
+    public const string SectionName = "Optimizely";
+
+    /// <summary>
     /// Your Optimizely sdk key. Supplied to <see cref="OptimizelySDK.OptimizelyFactory.NewDefaultInstance(string)"/>.
     /// </summary>
     [Required]

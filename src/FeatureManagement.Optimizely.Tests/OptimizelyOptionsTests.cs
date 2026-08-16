@@ -23,6 +23,10 @@ public class OptimizelyOptionsTests
     public void DefaultUserId_IsAnonymousUserByDefault() =>
         Assert.Equal("anonymous-user", new OptimizelyOptions().DefaultUserId);
 
+    [Fact]
+    public void SectionName_IsOptimizely() =>
+        Assert.Equal("Optimizely", OptimizelyOptions.SectionName);
+
     private static List<ValidationResult> Validate(object instance)
     {
         var results = new List<ValidationResult>();

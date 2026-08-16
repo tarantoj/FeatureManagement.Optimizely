@@ -2,7 +2,7 @@
 
 `FeatureManagement.Optimizely` connects two feature flag systems:
 
-- [Microsoft Feature Management](https://learn.microsoft.com/dotnet/microsoft.extensions.featuremanagement)
+- [Microsoft Feature Management](https://github.com/microsoft/FeatureManagement-Dotnet)
   provides the `IFeatureManager` API and the feature flag evaluation pipeline used by your application.
 - [Optimizely Feature Experimentation](https://docs.developers.optimizely.com/feature-experimentation/docs/csharp-sdk) is the source
   of truth for your feature flags, targeting rules, and experiments.

@@ -1,6 +1,6 @@
 # FeatureManagement.Optimizely
 
-A bridge between [Microsoft Feature Management](https://learn.microsoft.com/dotnet/microsoft.extensions.featuremanagement)
+A bridge between [Microsoft Feature Management](https://github.com/microsoft/FeatureManagement-Dotnet)
 and [Optimizely Feature Experimentation](https://docs.developers.optimizely.com/feature-experimentation/docs/csharp-sdk).
 
 Provides an Optimizely-backed `IFeatureDefinitionProvider` and `IFeatureFilter`, letting you drive

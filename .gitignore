@@ -55,3 +55,6 @@ msbuild.wrn
 
 api/
 _site/
+
+# ReSharper inspect report (see the `inspect` devenv script)
+inspect-report.sarif

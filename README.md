@@ -123,6 +123,12 @@ Inside the shell the following commands are available (each is defined under `sc
 | `build` | Build the solution (`dotnet build src`) |
 | `test` | Run the test suite on all target frameworks (`dotnet test src`) |
 | `docs` | Generate the docfx documentation (`docs/docfx.json`) |
+| `inspect` | Run ReSharper inspections with `jb inspectcode` (writes `inspect-report.sarif`) |
+
+ReSharper inspections use the `jetbrains.resharper.globaltools` local tool (pinned in
+`.config/dotnet-tools.json`, version `2026.2.0.2`). The CI workflow runs the same inspection
+(`.github/workflows/dotnet.yml`) and uploads the SARIF report as a code-scanning alert, so keep the
+report free of findings before pushing.
 
 You can also run the built-in devenv checks directly:
 

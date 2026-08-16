@@ -26,6 +26,7 @@
   scripts.build.exec = "dotnet build src";
   scripts.test.exec = "dotnet test src";
   scripts.docs.exec = "dotnet tool restore && dotnet tool run docfx docs/docfx.json";
+  scripts.inspect.exec = "dotnet tool restore && dotnet tool run jb inspectcode src/FeatureManagement.Optimizely.sln -o=inspect-report.sarif";
 
   # https://devenv.sh/git-hooks/
   git-hooks.hooks.nixfmt.enable = true;
@@ -56,6 +57,7 @@
 
     - Run `dotnet build src` after C# changes and before finishing a task.
     - Run `dotnet test src` after C# changes to verify the tests pass on all target frameworks.
+    - Run `dotnet tool run jb inspectcode src/FeatureManagement.Optimizely.sln` (see the `inspect` script) to run ReSharper inspections; keep the report free of findings.
     - The library and its tests target net8.0, net9.0, net10.0, and net11.0; the devenv shell provides SDKs 8, 9, 10, and 11.
     - Tests run offline against a real Optimizely SDK built from an embedded datafile; do not add tests that require an SDK key or network access.
     - Docs are generated with docfx from `docs/docfx.json` (see the `docs` script); when adding a docs page, register it in `docs/docs/toc.yml`.
@@ -64,7 +66,7 @@
     ## Using devenv
 
     - Enter the dev environment with `devenv shell`; all dotnet SDKs (8-11) and repo scripts are available there.
-    - Repo scripts are defined under `scripts.*` in `devenv.nix` and run as `<name>` inside the shell (or `devenv <name>`): `restore`, `build`, `test`, `docs`.
+    - Repo scripts are defined under `scripts.*` in `devenv.nix` and run as `<name>` inside the shell (or `devenv <name>`): `restore`, `build`, `test`, `docs`, `inspect`.
     - Run `devenv test`, `devenv lint`, and `devenv check` to run the configured tests, git-hook linting, and CI checks.
     - `devenv.yaml` and `devenv.lock` pin the devenv inputs; after changing `devenv.yaml`, run `devenv update` to refresh the lock.
     - Generated files under `.opencode/` and `opencode.jsonc` are written from `devenv.nix`; never edit them by hand.
@@ -111,11 +113,18 @@
       dotnet tool restore && dotnet tool run docfx docs/docfx.json
       ```
     '';
+    inspect = ''
+      # Run ReSharper inspections with jb inspectcode (writes inspect-report.sarif)
+
+      ```bash
+      dotnet tool restore && dotnet tool run jb inspectcode src/FeatureManagement.Optimizely.sln -o=inspect-report.sarif
+      ```
+    '';
   };
 
   # https://devenv.sh/basics/
   enterShell = ''
-    echo "FeatureManagement.Optimizely — use \`devenv shell\`; run \`build\`, \`test\`, \`verify\`, or \`docs\`"
+    echo "FeatureManagement.Optimizely — use \`devenv shell\`; run \`build\`, \`test\`, \`verify\`, \`docs\`, or \`inspect\`"
   '';
 
   # https://devenv.sh/tests/

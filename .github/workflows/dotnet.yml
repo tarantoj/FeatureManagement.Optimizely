@@ -32,8 +32,9 @@ jobs:
       run: dotnet build --no-restore src
     - name: Test
       run: dotnet test --no-build --verbosity normal src
-    # - name: JetBrains ReSharper Inspect Code
-    #   uses: JetBrains/ReSharper-InspectCode@v0.3
-    #   with:
-    #     solution: ./src/TarantoJ.FeatureManagement.Optimizely.csproj
-    #     tool-version: 2024.1.2
+    - name: ReSharper Inspect Code
+      uses: JetBrains/ReSharper-InspectCode@v0.14
+      with:
+        solution: ./src/FeatureManagement.Optimizely.sln
+        tool-version: 2026.2.0.2
+        upload-sarif: true

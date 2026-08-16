@@ -5,11 +5,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
-using OptimizelySDK.Config;
-using OptimizelySDK.ErrorHandler;
-using OptimizelySDK.Event;
-using OptimizelySDK.Event.Dispatcher;
-using OptimizelySDK.Notifications;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
@@ -78,8 +73,7 @@ public static class ServiceCollectionExtensions
             .Validate(
                 options => !string.IsNullOrWhiteSpace(options.SdkKey),
                 $"{nameof(OptimizelyOptions.SdkKey)} must not be empty."
-            )
-            .ValidateOnStart();
+            );
 
         services.TryAddSingleton<IUserProvider, DefaultUserProvider>();
 
@@ -93,12 +87,9 @@ public static class ServiceCollectionExtensions
                 var microsoftLogger = options.Logging
                     ? serviceProvider.GetService<ILogger<IOptimizely>>()
                     : null;
+                OptimizelyFactory.SetLogger(new LoggerAdapter(microsoftLogger));
 
-                var optimizelyLogger = microsoftLogger is null
-                    ? null
-                    : new LoggerAdapter(microsoftLogger);
-
-                return CreateOptimizely(options.SdkKey, optimizelyLogger);
+                return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
             }
         );
 
@@ -108,38 +99,5 @@ public static class ServiceCollectionExtensions
         >();
 
         return services;
-    }
-
-    private static OptimizelySDK.Optimizely CreateOptimizely(
-        string sdkKey,
-        OptimizelySDK.Logger.ILogger? logger
-    )
-    {
-        var effectiveLogger = logger ?? new OptimizelySDK.Logger.NoOpLogger();
-        var notificationCenter = new NotificationCenter();
-        var errorHandler = new DefaultErrorHandler(effectiveLogger, false);
-        var eventDispatcher = new DefaultEventDispatcher(effectiveLogger);
-
-        var configManager = new HttpProjectConfigManager.Builder()
-            .WithSdkKey(sdkKey)
-            .WithLogger(effectiveLogger)
-            .WithErrorHandler(errorHandler)
-            .WithNotificationCenter(notificationCenter)
-            .Build(true);
-
-        var eventProcessor = new BatchEventProcessor.Builder()
-            .WithLogger(effectiveLogger)
-            .WithEventDispatcher(eventDispatcher)
-            .WithNotificationCenter(notificationCenter)
-            .Build();
-
-        return OptimizelyFactory.NewDefaultInstance(
-            configManager,
-            notificationCenter,
-            eventDispatcher,
-            errorHandler,
-            effectiveLogger,
-            eventProcessor: eventProcessor
-        );
     }
 }

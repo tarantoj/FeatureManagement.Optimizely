@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
   "metadata": [
     {
       "src": [
@@ -23,22 +24,21 @@
         ]
       }
     ],
-    "resource": [
-      {
-        "files": [
-          "images/**"
-        ]
-      }
-    ],
     "output": "_site",
     "template": [
       "default",
       "modern"
     ],
+    "sitemap": {
+      "baseUrl": "https://tarantoj.github.io/FeatureManagement.Optimizely/",
+      "priority": 0.5,
+      "changefreq": "weekly"
+    },
     "globalMetadata": {
       "_appName": "FeatureManagement.Optimizely",
       "_appTitle": "FeatureManagement.Optimizely",
       "_enableSearch": true,
+      "_enableNewTab": true,
       "pdf": false
     }
   }

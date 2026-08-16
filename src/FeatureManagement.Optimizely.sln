@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TarantoJ.FeatureManagement.Optimizely", "FeatureManagement.Optimizely\TarantoJ.FeatureManagement.Optimizely.csproj", "{7E4FEFFD-CB4B-48AF-B9D1-49175848581D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TarantoJ.FeatureManagement.Optimizely.Tests", "FeatureManagement.Optimizely.Tests\TarantoJ.FeatureManagement.Optimizely.Tests.csproj", "{12F9EAAB-DF30-48D2-AE29-185586E76F78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{7E4FEFFD-CB4B-48AF-B9D1-49175848581D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E4FEFFD-CB4B-48AF-B9D1-49175848581D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E4FEFFD-CB4B-48AF-B9D1-49175848581D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12F9EAAB-DF30-48D2-AE29-185586E76F78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12F9EAAB-DF30-48D2-AE29-185586E76F78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12F9EAAB-DF30-48D2-AE29-185586E76F78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12F9EAAB-DF30-48D2-AE29-185586E76F78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

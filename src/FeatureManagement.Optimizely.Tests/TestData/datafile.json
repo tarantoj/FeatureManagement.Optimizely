@@ -1,0 +1,173 @@
+{
+  "experiments": [
+    {
+      "status": "Running",
+      "key": "test_experiment",
+      "layerId": "7719770039",
+      "trafficAllocation": [
+        { "entityId": "7722370027", "endOfRange": 4000 },
+        { "entityId": "7721010009", "endOfRange": 8000 }
+      ],
+      "audienceIds": [ "7718080042" ],
+      "variations": [
+        { "id": "7722370027", "key": "control" },
+        { "id": "7721010009", "key": "variation" }
+      ],
+      "forcedVariations": { "user1": "control" },
+      "id": "7716830082"
+    },
+    {
+      "status": "Paused",
+      "key": "paused_experiment",
+      "layerId": "7719779139",
+      "trafficAllocation": [
+        { "entityId": "7722370427", "endOfRange": 5000 },
+        { "entityId": "7721010509", "endOfRange": 8000 }
+      ],
+      "audienceIds": [],
+      "variations": [
+        { "id": "7722370427", "key": "control" },
+        { "id": "7721010509", "key": "variation" }
+      ],
+      "forcedVariations": {},
+      "id": "7716830585"
+    },
+    {
+      "id": "forced-exp",
+      "key": "forced_experiment",
+      "status": "Running",
+      "layerId": "layer-forced",
+      "audienceIds": [],
+      "variations": [
+        { "id": "var-on", "key": "var_on", "featureEnabled": true, "variables": [] },
+        { "id": "var-off", "key": "var_off", "featureEnabled": false, "variables": [] }
+      ],
+      "forcedVariations": { "user1": "var_on", "user2": "var_off" },
+      "trafficAllocation": [ { "entityId": "var-on", "endOfRange": 10000 } ]
+    }
+  ],
+  "version": "4",
+  "audiences": [
+    {
+      "conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"device_type\", \"type\": \"custom_attribute\", \"value\": \"iPhone\"}]], [\"or\", [\"or\", {\"name\": \"location\", \"type\": \"custom_attribute\", \"value\": \"San Francisco\"}]]]",
+      "id": "7718080042",
+      "name": "iPhone users in San Francisco"
+    },
+    {
+      "conditions": "[\"and\", [\"or\", [\"or\", {\"name\": \"plan\", \"type\": \"custom_attribute\", \"value\": \"premium\"}]]]",
+      "id": "aud-plan",
+      "name": "premium users"
+    }
+  ],
+  "groups": [
+    {
+      "policy": "random",
+      "trafficAllocation": [
+        { "entityId": "7723330021", "endOfRange": 2000 },
+        { "entityId": "7718750065", "endOfRange": 6000 }
+      ],
+      "experiments": [
+        {
+          "status": "Running",
+          "key": "group_experiment_1",
+          "layerId": "7721010011",
+          "trafficAllocation": [
+            { "entityId": "7722260071", "endOfRange": 5000 },
+            { "entityId": "7722360022", "endOfRange": 10000 }
+          ],
+          "audienceIds": [],
+          "variations": [
+            { "id": "7722260071", "key": "group_exp_1_var_1", "variables": [], "featureEnabled": true },
+            { "id": "7722360022", "key": "group_exp_1_var_2", "variables": [], "featureEnabled": true }
+          ],
+          "forcedVariations": { "user1": "group_exp_1_var_1" },
+          "id": "7723330021"
+        },
+        {
+          "status": "Running",
+          "key": "group_experiment_2",
+          "layerId": "7721020020",
+          "trafficAllocation": [
+            { "entityId": "7713030086", "endOfRange": 5000 },
+            { "entityId": "7725250007", "endOfRange": 10000 }
+          ],
+          "audienceIds": [],
+          "variations": [
+            { "id": "7713030086", "key": "group_exp_2_var_1", "variables": [], "featureEnabled": false },
+            { "id": "7725250007", "key": "group_exp_2_var_2", "variables": [], "featureEnabled": false }
+          ],
+          "forcedVariations": {},
+          "id": "7718750065"
+        }
+      ],
+      "id": "7722400015"
+    }
+  ],
+  "featureFlags": [
+    {
+      "id": "155549",
+      "key": "boolean_feature",
+      "rolloutId": "",
+      "experimentIds": [ "7723330021", "7718750065" ],
+      "variables": []
+    },
+    {
+      "id": "155564",
+      "key": "empty_feature",
+      "rolloutId": "",
+      "experimentIds": [],
+      "variables": []
+    },
+    {
+      "id": "155570",
+      "key": "premium_feature",
+      "rolloutId": "rollout-premium",
+      "experimentIds": [],
+      "variables": []
+    },
+    {
+      "id": "155571",
+      "key": "forced_feature",
+      "rolloutId": "",
+      "experimentIds": [ "forced-exp" ],
+      "variables": []
+    }
+  ],
+  "rollouts": [
+    {
+      "id": "rollout-premium",
+      "experiments": [
+        {
+          "id": "prem-rule",
+          "key": "premium_feature_rollout_1",
+          "status": "Running",
+          "layerId": "rollout-premium",
+          "audienceIds": [ "aud-plan" ],
+          "variations": [
+            { "id": "prem-var", "key": "on", "featureEnabled": true, "variables": [] }
+          ],
+          "trafficAllocation": [ { "entityId": "prem-var", "endOfRange": 10000 } ]
+        }
+      ]
+    }
+  ],
+  "attributes": [
+    { "id": "7723280020", "key": "device_type" },
+    { "id": "attr-plan", "key": "plan" }
+  ],
+  "projectId": "7720880029",
+  "accountId": "1592310167",
+  "events": [
+    {
+      "experimentIds": [ "7716830082", "7723330021", "7718750065", "7716830585" ],
+      "id": "7718020063",
+      "key": "purchase"
+    }
+  ],
+  "revision": "15",
+  "sdkKey": "TestData",
+  "environmentKey": "Production",
+  "anonymizeIP": false,
+  "sendFlagDecisions": true,
+  "botFiltering": true
+}

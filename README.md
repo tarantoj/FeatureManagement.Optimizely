@@ -53,7 +53,8 @@ Instead of hard-coding the options, bind `OptimizelyOptions` from your configura
   "Optimizely": {
     "SdkKey": "your-sdk-key",
     "Logging": true,
-    "DefaultUserId": "anonymous-user"
+    "DefaultUserId": "anonymous-user",
+    "Telemetry": { "Enabled": true }
   }
 }
 ```
@@ -69,6 +70,26 @@ builder.Services.AddOptimizelyFeatureDefinitionProvider(_ => { });
 stays in sync. Values set in the `Action` passed to `AddOptimizelyFeatureDefinitionProvider` are applied
 after configuration binding, so they take precedence over `appsettings.json`; you can mix both, for
 example by keeping `SdkKey` in configuration and overriding `DefaultUserId` in code.
+
+### Telemetry
+
+Setting `OptimizelyOptions.Telemetry` (`TelemetryConfiguration`, disabled by default) enables
+Microsoft Feature Management telemetry for every Optimizely feature: the feature manager emits an
+`EvaluationEvent` as a `System.Diagnostics.ActivityEvent` whenever a feature is evaluated. Its
+`Metadata` dictionary is carried onto each event. You need an `Activity` listener or an OpenTelemetry
+integration to observe the events.
+
+```csharp
+builder.Services.AddOptimizelyFeatureDefinitionProvider(options =>
+{
+    options.SdkKey = "your-sdk-key";
+    options.Telemetry = new TelemetryConfiguration
+    {
+        Enabled = true,
+        Metadata = new Dictionary<string, string> { ["source"] = "optimizely" },
+    };
+});
+```
 
 ## Provide the current user
 
@@ -116,6 +137,30 @@ public class ExampleService(IFeatureManager features)
 ```
 
 The feature name must match the flag key in your Optimizely project.
+
+### Variants and variables
+
+When a feature is evaluated for a user, Optimizely also assigns a variation with variables (for
+example, which feature flag variant your user is bucketed into). Retrieve the full decision with
+`IOptimizelyFeatureClient` (registered with the definition provider):
+
+```csharp
+public class ExampleService(IOptimizelyFeatureClient optimizely)
+{
+    public async Task<string?> GetHeroTitle()
+    {
+        var decision = await optimizely.GetVariantAsync("hero_content");
+
+        return decision?.Variables.ToDictionary().TryGetValue("title", out var title) == true
+            ? title as string
+            : null;
+    }
+}
+```
+
+`OptimizelyDecision` exposes `VariationKey` (the assigned variation), `Variables`
+(`OptimizelyJSON.ToDictionary()`), `RuleKey`, `Enabled`, and `Reasons`. It is `null` only when no user
+context could be created for the current user.
 
 ## Testing
 

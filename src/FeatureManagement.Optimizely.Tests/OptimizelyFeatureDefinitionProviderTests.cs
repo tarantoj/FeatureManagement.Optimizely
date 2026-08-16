@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 using Xunit;
 
@@ -8,7 +9,7 @@ public class OptimizelyFeatureDefinitionProviderTests
     [Fact]
     public async Task GetAllFeatureDefinitionsAsync_ReturnsFeatureForEachFeatureInConfig()
     {
-        var provider = new OptimizelyFeatureDefinitionProvider(TestDataFile.CreateOptimizely());
+        var provider = CreateProvider();
 
         var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
 
@@ -27,7 +28,7 @@ public class OptimizelyFeatureDefinitionProviderTests
     [Fact]
     public async Task GetFeatureDefinitionAsync_ReturnsDefinitionForKnownFeature()
     {
-        var provider = new OptimizelyFeatureDefinitionProvider(TestDataFile.CreateOptimizely());
+        var provider = CreateProvider();
 
         var definition = await provider.GetFeatureDefinitionAsync("empty_feature");
 
@@ -39,7 +40,7 @@ public class OptimizelyFeatureDefinitionProviderTests
     [Fact]
     public async Task GetFeatureDefinitionAsync_ReturnsNullForUnknownFeature()
     {
-        var provider = new OptimizelyFeatureDefinitionProvider(TestDataFile.CreateOptimizely());
+        var provider = CreateProvider();
 
         var definition = await provider.GetFeatureDefinitionAsync("unknown_feature");
 
@@ -49,9 +50,7 @@ public class OptimizelyFeatureDefinitionProviderTests
     [Fact]
     public async Task GetAllFeatureDefinitionsAsync_ReturnsEmptyWhenConfigIsUnavailable()
     {
-        var provider = new OptimizelyFeatureDefinitionProvider(
-            new OptimizelySDK.Optimizely("not a datafile", skipJsonValidation: true)
-        );
+        var provider = CreateUnavailableProvider();
 
         var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
 
@@ -61,14 +60,92 @@ public class OptimizelyFeatureDefinitionProviderTests
     [Fact]
     public async Task GetFeatureDefinitionAsync_ReturnsNullWhenConfigIsUnavailable()
     {
-        var provider = new OptimizelyFeatureDefinitionProvider(
-            new OptimizelySDK.Optimizely("not a datafile", skipJsonValidation: true)
-        );
+        var provider = CreateUnavailableProvider();
 
         var definition = await provider.GetFeatureDefinitionAsync("boolean_feature");
 
         Assert.Null(definition);
     }
+
+    [Fact]
+    public async Task GetAllFeatureDefinitionsAsync_DoesNotSetTelemetryByDefault()
+    {
+        var provider = CreateProvider();
+
+        var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
+
+        Assert.All(definitions, definition => Assert.Null(definition.Telemetry));
+    }
+
+    [Fact]
+    public async Task GetAllFeatureDefinitionsAsync_SetsConfiguredTelemetry()
+    {
+        var provider = CreateProvider(
+            new OptimizelyOptions
+            {
+                Telemetry = new TelemetryConfiguration
+                {
+                    Enabled = true,
+                    Metadata = new Dictionary<string, string> { ["source"] = "optimizely" },
+                },
+            }
+        );
+
+        var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
+
+        foreach (var definition in definitions)
+        {
+            Assert.NotNull(definition.Telemetry);
+            Assert.True(definition.Telemetry.Enabled);
+            Assert.Equal("optimizely", definition.Telemetry.Metadata["source"]);
+        }
+    }
+
+    [Fact]
+    public async Task GetAllFeatureDefinitionsAsync_DoesNotShareTelemetryInstances()
+    {
+        var provider = CreateProvider(
+            new OptimizelyOptions
+            {
+                Telemetry = new TelemetryConfiguration { Enabled = true },
+            }
+        );
+
+        var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
+
+        Assert.NotEmpty(definitions);
+        foreach (var definition in definitions)
+        {
+            Assert.NotNull(definition.Telemetry);
+        }
+
+        Assert.NotSame(definitions[0].Telemetry, definitions[1].Telemetry);
+    }
+
+    [Fact]
+    public async Task GetFeatureDefinitionAsync_ReturnsCachedDefinitions()
+    {
+        var provider = CreateProvider();
+
+        var first = await provider.GetFeatureDefinitionAsync("empty_feature");
+        var second = await provider.GetFeatureDefinitionAsync("empty_feature");
+
+        Assert.Same(first, second);
+    }
+
+    private static OptimizelyFeatureDefinitionProvider CreateProvider(
+        OptimizelyOptions? options = null
+    ) =>
+        new(
+            TestDataFile.CreateOptimizely(),
+            Options.Create(options ?? new OptimizelyOptions())
+        );
+
+    private static OptimizelyFeatureDefinitionProvider CreateUnavailableProvider() =>
+        new(
+            new OptimizelySDK.Optimizely("not a datafile", skipJsonValidation: true),
+            Options.Create(new OptimizelyOptions())
+        );
 
     private static async Task<List<FeatureDefinition>> ToListAsync(
         IAsyncEnumerable<FeatureDefinition> source

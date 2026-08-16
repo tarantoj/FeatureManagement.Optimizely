@@ -27,6 +27,10 @@ public class OptimizelyOptionsTests
     public void SectionName_IsOptimizely() =>
         Assert.Equal("Optimizely", OptimizelyOptions.SectionName);
 
+    [Fact]
+    public void Telemetry_IsDisabledByDefault() =>
+        Assert.Null(new OptimizelyOptions().Telemetry);
+
     private static List<ValidationResult> Validate(object instance)
     {
         var results = new List<ValidationResult>();

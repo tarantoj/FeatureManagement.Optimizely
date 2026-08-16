@@ -98,6 +98,8 @@ public static class ServiceCollectionExtensions
             OptimizelyFeatureDefinitionProvider
         >();
 
+        services.TryAddSingleton<IOptimizelyFeatureClient, OptimizelyFeatureClient>();
+
         return services;
     }
 }

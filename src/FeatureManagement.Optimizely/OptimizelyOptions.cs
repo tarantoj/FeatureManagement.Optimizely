@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using JetBrains.Annotations;
+using Microsoft.FeatureManagement;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
@@ -32,4 +33,11 @@ public class OptimizelyOptions
     /// <see cref="IUserProvider"/>.
     /// </summary>
     public string DefaultUserId { get; set; } = "anonymous-user";
+
+    /// <summary>
+    /// Telemetry configuration applied to every feature returned by
+    /// <see cref="OptimizelyFeatureDefinitionProvider"/>. When null, no
+    /// telemetry is emitted. Disabled by default.
+    /// </summary>
+    public TelemetryConfiguration? Telemetry { get; set; }
 }

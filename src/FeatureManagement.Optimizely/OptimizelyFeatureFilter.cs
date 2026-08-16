@@ -1,5 +1,4 @@
 using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
@@ -26,22 +25,14 @@ public class OptimizelyFeatureFilter(
     /// <inheritdoc/>
     public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
     {
-        using var scope = serviceProvider.CreateScope();
-        var userProvider = scope.ServiceProvider.GetRequiredService<IUserProvider>();
+        var decision = await OptimizelyDecisionService.DecideAsync(
+            optimizely,
+            serviceProvider,
+            logger,
+            context.FeatureName,
+            context.CancellationToken
+        );
 
-        var (userId, userAttributes) = await userProvider.GetUser();
-
-        var userContext = optimizely.CreateUserContext(userId, userAttributes);
-        if (userContext is null)
-        {
-            logger.LogInvalidUserId(userId);
-            return false;
-        }
-
-        var decision = userContext.Decide(context.FeatureName);
-
-        logger.LogDecision(context.FeatureName, decision);
-
-        return decision.Enabled;
+        return decision?.Enabled ?? false;
     }
 }

@@ -138,30 +138,6 @@ public class ExampleService(IFeatureManager features)
 
 The feature name must match the flag key in your Optimizely project.
 
-### Variants and variables
-
-When a feature is evaluated for a user, Optimizely also assigns a variation with variables (for
-example, which feature flag variant your user is bucketed into). Retrieve the full decision with
-`IOptimizelyFeatureClient` (registered with the definition provider):
-
-```csharp
-public class ExampleService(IOptimizelyFeatureClient optimizely)
-{
-    public async Task<string?> GetHeroTitle()
-    {
-        var decision = await optimizely.GetVariantAsync("hero_content");
-
-        return decision?.Variables.ToDictionary().TryGetValue("title", out var title) == true
-            ? title as string
-            : null;
-    }
-}
-```
-
-`OptimizelyDecision` exposes `VariationKey` (the assigned variation), `Variables`
-(`OptimizelyJSON.ToDictionary()`), `RuleKey`, `Enabled`, and `Reasons`. It is `null` only when no user
-context could be created for the current user.
-
 ### Switching service implementations by variation
 
 To select a different service implementation based on the variation assigned to the current user,

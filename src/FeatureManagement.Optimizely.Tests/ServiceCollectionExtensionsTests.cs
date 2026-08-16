@@ -80,21 +80,6 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddOptimizelyFeatureDefinitionProvider_RegistersFeatureClientAsSingleton()
-    {
-        var services = new ServiceCollection();
-
-        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
-
-        var descriptor = Assert.Single(
-            services,
-            d => d.ServiceType == typeof(IOptimizelyFeatureClient)
-        );
-        Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime);
-        Assert.Equal(typeof(OptimizelyFeatureClient), descriptor.ImplementationType);
-    }
-
-    [Fact]
     public void AddOptimizelyVariantService_RegistersProviderAsScoped()
     {
         var services = new ServiceCollection();

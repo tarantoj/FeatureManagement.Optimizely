@@ -1,19 +1,25 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
+using OptimizelySDK;
 using OptimizelySDK.OptimizelyDecisions;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
 internal sealed class OptimizelyVariantServiceProvider<TService>(
     string featureName,
-    IOptimizelyFeatureClient optimizely,
+    IOptimizely optimizely,
+    ILogger<OptimizelyVariantServiceProvider<TService>> logger,
     IServiceProvider serviceProvider
 ) : IVariantServiceProvider<TService>
     where TService : class
 {
     public async ValueTask<TService> GetServiceAsync(CancellationToken cancellationToken)
     {
-        OptimizelyDecision? decision = await optimizely.GetVariantAsync(
+        OptimizelyDecision? decision = await OptimizelyDecisionService.DecideAsync(
+            optimizely,
+            serviceProvider,
+            logger,
             featureName,
             cancellationToken
         );

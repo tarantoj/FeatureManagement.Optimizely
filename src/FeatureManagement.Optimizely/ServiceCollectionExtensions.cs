@@ -82,7 +82,10 @@ public static class ServiceCollectionExtensions
             (serviceProvider) =>
                 new OptimizelyVariantServiceProvider<TService>(
                     featureName,
-                    serviceProvider.GetRequiredService<IOptimizelyFeatureClient>(),
+                    serviceProvider.GetRequiredService<IOptimizely>(),
+                    serviceProvider.GetRequiredService<
+                        ILogger<OptimizelyVariantServiceProvider<TService>>
+                    >(),
                     serviceProvider
                 )
         );
@@ -126,8 +129,6 @@ public static class ServiceCollectionExtensions
             IFeatureDefinitionProvider,
             OptimizelyFeatureDefinitionProvider
         >();
-
-        services.TryAddSingleton<IOptimizelyFeatureClient, OptimizelyFeatureClient>();
 
         return services;
     }

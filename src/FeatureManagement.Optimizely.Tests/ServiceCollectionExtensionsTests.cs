@@ -130,6 +130,40 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public async Task FeatureManagementPipeline_CustomUserProviderRegisteredBefore_IsNotShadowedByDefault()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IUserProvider>(
+            new FakeUserProvider { Result = ("user2", null) }
+        );
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddFeatureManagement().AddOptimizelyFeatureFilter();
+
+        await using var provider = services.BuildServiceProvider();
+        var features = provider.GetRequiredService<IFeatureManager>();
+
+        Assert.False(await features.IsEnabledAsync("forced_feature"));
+    }
+
+    [Fact]
+    public async Task FeatureManagementPipeline_CustomUserProviderRegisteredAfter_IsNotShadowedByDefault()
+    {
+        var services = new ServiceCollection();
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
+        services.AddSingleton<IUserProvider>(
+            new FakeUserProvider { Result = ("user2", null) }
+        );
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddFeatureManagement().AddOptimizelyFeatureFilter();
+
+        await using var provider = services.BuildServiceProvider();
+        var features = provider.GetRequiredService<IFeatureManager>();
+
+        Assert.False(await features.IsEnabledAsync("forced_feature"));
+    }
+
+    [Fact]
     public async Task FeatureManagementPipeline_UsesConfiguredDefaultUser()
     {
         var services = new ServiceCollection();

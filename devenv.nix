@@ -53,7 +53,7 @@
     # Development Rules
 
     - Run `dotnet build src` after C# changes and before finishing a task.
-    - The library targets net8.0 and net9.0; the devenv shell provides SDKs 8, 9, 10, and 11.
+    - The library targets net8.0, net9.0, net10.0, and net11.0; the devenv shell provides SDKs 8, 9, 10, and 11.
     - Docs are generated with docfx from `docs/docfx.json` (see the `docs` script).
     - Use conventional commit messages.
   '';

@@ -28,11 +28,15 @@ public class LoggerAdapterTests
     }
 
     [Fact]
-    public void Log_DoesNothingWhenLoggerIsNull()
+    public void Log_WithNullLogger_DoesNotThrow()
     {
         var adapter = new LoggerAdapter(logger: null);
 
-        adapter.Log(OptimizelyLogLevel.WARN, "message");
+        var exception = Record.Exception(() =>
+            adapter.Log(OptimizelyLogLevel.WARN, "message")
+        );
+
+        Assert.Null(exception);
     }
 
     [Fact]

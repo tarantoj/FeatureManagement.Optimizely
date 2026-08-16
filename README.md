@@ -90,6 +90,42 @@ dotnet test src
 
 This builds and runs the suite against `net8.0`, `net9.0`, `net10.0`, and `net11.0`.
 
+## Development with devenv
+
+The repo uses [devenv](https://devenv.sh) for its development environment, which provisions all four
+.NET SDKs (`net8.0`–`net11.0`) and the project tooling. Configuration lives in `devenv.nix`
+(`devenv.yaml`/`devenv.lock` pin the inputs).
+
+Enter the development shell:
+
+```bash
+devenv shell
+```
+
+Inside the shell the following commands are available (each is defined under `scripts.*` in
+`devenv.nix`, so they also run as `devenv <name>`):
+
+| Command | Purpose |
+| --- | --- |
+| `restore` | Restore NuGet packages (`dotnet restore src`) |
+| `build` | Build the solution (`dotnet build src`) |
+| `test` | Run the test suite on all target frameworks (`dotnet test src`) |
+| `docs` | Generate the docfx documentation (`docs/docfx.json`) |
+
+You can also run the built-in devenv checks directly:
+
+```bash
+devenv test    # runs the tests
+devenv lint    # runs git hooks (e.g. nixfmt)
+devenv check   # runs the CI checks
+```
+
+After changing `devenv.yaml`, run `devenv update` to refresh `devenv.lock`.
+
+OpenCode is configured declaratively through the `opencode.*` options in `devenv.nix`; the generated
+files under `.opencode/` and `opencode.jsonc` are gitignored and should not be edited by hand. After
+changing them, regenerate with `devenv shell` and restart OpenCode.
+
 ## License
 
 [MIT](LICENSE)

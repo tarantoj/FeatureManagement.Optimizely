@@ -1,7 +1,7 @@
 # FeatureManagement.Optimizely
 
 A bridge between [Microsoft Feature Management](https://learn.microsoft.com/dotnet/microsoft.extensions.featuremanagement)
-and [Optimizely Feature Experimentation](https://developers.optimizely.com/x/experiments/).
+and [Optimizely Feature Experimentation](https://docs.developers.optimizely.com/feature-experimentation/docs/csharp-sdk).
 
 Provides an Optimizely-backed `IFeatureDefinitionProvider` and `IFeatureFilter`, letting you drive
 ASP.NET Core feature flags from your Optimizely project with the `IFeatureManager` API you already use.

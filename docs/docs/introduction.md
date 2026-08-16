@@ -4,7 +4,7 @@
 
 - [Microsoft Feature Management](https://learn.microsoft.com/dotnet/microsoft.extensions.featuremanagement)
   provides the `IFeatureManager` API and the feature flag evaluation pipeline used by your application.
-- [Optimizely Feature Experimentation](https://developers.optimizely.com/x/experiments/) is the source
+- [Optimizely Feature Experimentation](https://docs.developers.optimizely.com/feature-experimentation/docs/csharp-sdk) is the source
   of truth for your feature flags, targeting rules, and experiments.
 
 The library exposes three pieces that plug into the Microsoft Feature Management pipeline:

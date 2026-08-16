@@ -95,6 +95,23 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
+    public void AddOptimizelyVariantService_RegistersProviderAsScoped()
+    {
+        var services = new ServiceCollection();
+
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
+        services.AddOptimizelyVariantService<IWidget>("forced_feature");
+
+        var descriptor = Assert.Single(
+            services,
+            d => d.ServiceType == typeof(IVariantServiceProvider<IWidget>)
+        );
+        Assert.Equal(ServiceLifetime.Scoped, descriptor.Lifetime);
+    }
+
+    private interface IWidget;
+
+    [Fact]
     public async Task FeatureManagementPipeline_EvaluatesOptimizelyFeatures()
     {
         var services = new ServiceCollection();

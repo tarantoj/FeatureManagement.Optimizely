@@ -61,6 +61,35 @@ public static class ServiceCollectionExtensions
         return features.AddFeatureFilter<OptimizelyFeatureFilter>();
     }
 
+    /// <summary>
+    /// Registers an <see cref="IVariantServiceProvider{TService}"/> that resolves
+    /// <typeparamref name="TService"/> according to the Optimizely variation assigned to the
+    /// current user for <paramref name="featureName"/>.
+    /// </summary>
+    /// <typeparam name="TService">The service type to vary by Optimizely variation key</typeparam>
+    /// <param name="services">The service collection</param>
+    /// <param name="featureName">The Optimizely feature key that determines the assigned variation</param>
+    public static IServiceCollection AddOptimizelyVariantService<TService>(
+        this IServiceCollection services,
+        string featureName
+    )
+        where TService : class
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(featureName);
+
+        services.TryAddScoped<IVariantServiceProvider<TService>>(
+            (serviceProvider) =>
+                new OptimizelyVariantServiceProvider<TService>(
+                    featureName,
+                    serviceProvider.GetRequiredService<IOptimizelyFeatureClient>(),
+                    serviceProvider
+                )
+        );
+
+        return services;
+    }
+
     private static IServiceCollection AddOptimizelyFeatureDefinitionProviderInternal(
         this IServiceCollection services,
         Action<OptimizelyOptions> configureOptions

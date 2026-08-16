@@ -162,6 +162,43 @@ public class ExampleService(IOptimizelyFeatureClient optimizely)
 (`OptimizelyJSON.ToDictionary()`), `RuleKey`, `Enabled`, and `Reasons`. It is `null` only when no user
 context could be created for the current user.
 
+### Switching service implementations by variation
+
+To select a different service implementation based on the variation assigned to the current user,
+register `IVariantServiceProvider<TService>` with `AddOptimizelyVariantService<TService>`. The
+provider implements the Microsoft Feature Management interface and resolves `TService` by the
+Optimizely variation key — via a keyed registration, a `[VariantServiceAlias]`, or the implementation
+type name (case-insensitive).
+
+```csharp
+builder.Services.AddScoped<IPaymentGateway, CardGateway>();    // assigned to the "card" variation
+builder.Services.AddScoped<IPaymentGateway, CryptoGateway>();  // assigned to the "crypto" variation
+
+builder.Services.AddOptimizelyVariantService<IPaymentGateway>("checkout_payment");
+
+public class CheckoutService(IVariantServiceProvider<IPaymentGateway> payment)
+{
+    public async Task Pay()
+    {
+        var gateway = await payment.GetServiceAsync(CancellationToken.None);
+
+        await gateway.Charge();
+    }
+}
+```
+
+```csharp
+[VariantServiceAlias("card")]
+public class CardGateway : IPaymentGateway { }
+
+// or, equivalently, register the implementation keyed by the variation:
+builder.Services.AddKeyedScoped<IPaymentGateway, CardGateway>("card");
+```
+
+`IVariantServiceProvider<TService>` is registered as scoped, so implementations are resolved from the
+current request scope. It returns `null` when the feature is not assigned a variation (or no
+implementation matches).
+
 ## Testing
 
 The test project (`src/FeatureManagement.Optimizely.Tests`) runs against a real Optimizely SDK

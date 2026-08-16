@@ -5,6 +5,21 @@ project.lock.json
 *.pyc
 nupkg/
 
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# devenv-generated opencode config (source of truth: devenv.nix)
+.opencode
+opencode.jsonc
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
 # Visual Studio Code
 .vscode
 

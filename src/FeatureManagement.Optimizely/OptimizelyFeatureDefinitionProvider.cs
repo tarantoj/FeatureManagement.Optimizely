@@ -23,8 +23,8 @@ public class OptimizelyFeatureDefinitionProvider(IOptimizely optimizely)
             .ToAsyncEnumerable();
 
     /// <inheritdoc/>
-    public Task<FeatureDefinition> GetFeatureDefinitionAsync(string featureName) =>
+    public Task<FeatureDefinition?> GetFeatureDefinitionAsync(string featureName) =>
         GetAllFeatureDefinitionsAsync()
-            .SingleAsync(feature => feature.Name == featureName)
+            .FirstOrDefaultAsync(feature => feature.Name == featureName)
             .AsTask();
 }

@@ -29,10 +29,15 @@ jobs:
     - name: Dotnet Setup
       uses: actions/setup-dotnet@v6
       with:
-        dotnet-version: 9.x
+        dotnet-version: |
+          8.0.x
+          9.0.x
+          10.0.x
+          11.0.x
+        include-prerelease: true
 
-    - run: dotnet tool update -g docfx
-    - run: docfx docs/docfx.json
+    - run: dotnet tool restore
+    - run: dotnet tool run docfx docs/docfx.json
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v5

@@ -78,6 +78,18 @@ public class ExampleService(IFeatureManager features)
 
 The feature name must match the flag key in your Optimizely project.
 
+## Testing
+
+The test project (`src/FeatureManagement.Optimizely.Tests`) runs against a real Optimizely SDK
+instance built from a minimal embedded datafile, so the suite is fast and fully offline. It targets
+the same frameworks as the library.
+
+```bash
+dotnet test src
+```
+
+This builds and runs the suite against `net8.0`, `net9.0`, `net10.0`, and `net11.0`.
+
 ## License
 
 [MIT](LICENSE)

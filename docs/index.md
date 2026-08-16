@@ -10,4 +10,5 @@ ASP.NET Core feature flags from your Optimizely project with the `IFeatureManage
 
 - [Getting Started](docs/getting-started.md) - install and configure the library
 - [Introduction](docs/introduction.md) - how the library works
+- [Testing](docs/testing.md) - run the test suite
 - [API Reference](api/TarantoJ.FeatureManagement.Optimizely.yml) - full type reference

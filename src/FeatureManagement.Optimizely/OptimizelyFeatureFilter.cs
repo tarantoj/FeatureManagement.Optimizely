@@ -1,22 +1,22 @@
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
+using OptimizelySDK.OptimizelyDecisions;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
 /// <summary>
 /// A feature filter that can be used to activate features from Optimizely
 /// </summary>
-/// <param name="optimizely">An instance of Optimizely</param>
+/// <param name="serviceProvider">The service provider used to resolve the current <see cref="IOptimizelyUserContextAccessor"/></param>
 /// <param name="logger">A logger instance</param>
-/// <param name="serviceProvider">The service provider used to resolve the current <see cref="IUserProvider"/></param>
 [FilterAlias(Alias)]
 [PublicAPI]
 public class OptimizelyFeatureFilter(
-    IOptimizely optimizely,
-    ILogger<OptimizelyFeatureFilter> logger,
-    IServiceProvider serviceProvider
+    IServiceProvider serviceProvider,
+    ILogger<OptimizelyFeatureFilter> logger
 ) : IFeatureFilter
 {
     private const string Alias = "Optimizely";
@@ -25,12 +25,19 @@ public class OptimizelyFeatureFilter(
     /// <inheritdoc/>
     public async Task<bool> EvaluateAsync(FeatureFilterEvaluationContext context)
     {
-        var decision = await OptimizelyDecisionService.DecideAsync(
-            optimizely,
-            serviceProvider,
+        using var scope = serviceProvider.CreateScope();
+        var userContextAccessor = scope.ServiceProvider.GetRequiredService<
+            IOptimizelyUserContextAccessor
+        >();
+
+        OptimizelyUserContext? userContext = await userContextAccessor
+            .GetUserContextAsync(context.CancellationToken)
+            .ConfigureAwait(false);
+
+        OptimizelyDecision? decision = OptimizelyDecisionService.Decide(
+            userContext,
             logger,
-            context.FeatureName,
-            context.CancellationToken
+            context.FeatureName
         );
 
         return decision?.Enabled ?? false;

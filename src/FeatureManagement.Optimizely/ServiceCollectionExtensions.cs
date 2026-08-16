@@ -30,26 +30,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the Optimizely <see cref="IFeatureDefinitionProvider"/>,
-    /// must be called before <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement(IServiceCollection)"/>.
-    /// </summary>
-    /// <typeparam name="TUserProvider">An implementation of <see cref="IUserProvider" /></typeparam>
-    public static IServiceCollection AddOptimizelyFeatureDefinitionProvider<TUserProvider>(
-        this IServiceCollection services,
-        Action<OptimizelyOptions> configureOptions
-    )
-        where TUserProvider : class, IUserProvider
-    {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configureOptions);
-
-        services.TryAddScoped<IUserProvider, TUserProvider>();
-
-        return services.AddOptimizelyFeatureDefinitionProviderInternal(configureOptions);
-    }
-
-    /// <summary>
-    /// Registers the Optimizely <see cref="IFeatureFilter"/>,
+    /// Registers the Optimizely <see cref="IFeatureFilter"/>s,
     /// must be registered after <see cref="Microsoft.FeatureManagement.ServiceCollectionExtensions.AddFeatureManagement(IServiceCollection)"/>
     /// </summary>
     public static IFeatureManagementBuilder AddOptimizelyFeatureFilter(
@@ -58,7 +39,9 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(features);
 
-        return features.AddFeatureFilter<OptimizelyFeatureFilter>();
+        return features
+            .AddFeatureFilter<OptimizelyFeatureFilter>()
+            .AddFeatureFilter<OptimizelyContextualFeatureFilter>();
     }
 
     /// <summary>
@@ -82,7 +65,7 @@ public static class ServiceCollectionExtensions
             (serviceProvider) =>
                 new OptimizelyVariantServiceProvider<TService>(
                     featureName,
-                    serviceProvider.GetRequiredService<IOptimizely>(),
+                    serviceProvider.GetRequiredService<IOptimizelyUserContextAccessor>(),
                     serviceProvider.GetRequiredService<
                         ILogger<OptimizelyVariantServiceProvider<TService>>
                     >(),
@@ -107,7 +90,7 @@ public static class ServiceCollectionExtensions
                 $"{nameof(OptimizelyOptions.SdkKey)} must not be empty."
             );
 
-        services.TryAddSingleton<IUserProvider, DefaultUserProvider>();
+        services.TryAddScoped<IOptimizelyUserContextAccessor, DefaultUserContextAccessor>();
 
         services.TryAddSingleton<IOptimizely>(
             (serviceProvider) =>

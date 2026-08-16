@@ -18,14 +18,22 @@ Microsoft Feature Management and wired up to be evaluated by the `OptimizelyFeat
 ## `OptimizelyFeatureFilter`
 
 An `IFeatureFilter` (alias `Optimizely`) that evaluates a feature by asking Optimizely for a decision.
-It creates an `OptimizelyUserContext` from the current user supplied by your `IUserProvider`, calls
-`Decide(featureName)`, and returns whether the feature is enabled for that user. This is what makes
-Optimizely's audiences, targeting rules, and experiments take effect.
+It creates an `OptimizelyUserContext` from the current user supplied by your
+`IOptimizelyUserContextAccessor`, calls `Decide(featureName)`, and returns whether the feature is
+enabled for that user. This is what makes Optimizely's audiences, targeting rules, and experiments
+take effect.
 
-## `IUserProvider`
+## `OptimizelyContextualFeatureFilter`
 
-Your application's implementation of `IUserProvider` supplies the current user (`userId`) and any
-user attributes to the filter so Optimizely can evaluate targeting rules for that user.
+An `IContextualFeatureFilter<OptimizelyUserContext>` (alias `Optimizely`) that evaluates a feature
+using the `OptimizelyUserContext` passed to `IsEnabledAsync`. When you pass a user context to
+`IsEnabledAsync`, it is used instead of the accessor.
+
+## `IOptimizelyUserContextAccessor`
+
+Your application's implementation of `IOptimizelyUserContextAccessor` supplies the current
+`OptimizelyUserContext` (user id and attributes) to the filter so Optimizely can evaluate targeting
+rules for that user.
 
 ## Registration order
 

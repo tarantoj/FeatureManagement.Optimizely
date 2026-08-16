@@ -101,8 +101,14 @@ public class OptimizelyVariantServiceProviderTests
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddSingleton<IUserProvider>(new FakeUserProvider { Result = (userId, null) });
         services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddSingleton<IOptimizelyUserContextAccessor>(
+            (serviceProvider) =>
+                new FakeUserContextAccessor(serviceProvider.GetRequiredService<IOptimizely>())
+                {
+                    Result = (userId, null),
+                }
+        );
         services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
         configure(services);
 

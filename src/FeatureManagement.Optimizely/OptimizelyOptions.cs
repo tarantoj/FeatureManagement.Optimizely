@@ -30,7 +30,7 @@ public class OptimizelyOptions
 
     /// <summary>
     /// The user id used when evaluating features without a registered
-    /// <see cref="IUserProvider"/>.
+    /// <see cref="IOptimizelyUserContextAccessor"/>.
     /// </summary>
     public string DefaultUserId { get; set; } = "anonymous-user";
 

@@ -38,23 +38,25 @@ output to `ILogger`.
 ## Provide the current user
 
 Optimizely needs to know which user is evaluating the feature so that audiences and targeting rules
-can be applied. Implement `IUserProvider` and register it with the generic overload:
+can be applied. Register an `IOptimizelyUserContextAccessor` that returns an `OptimizelyUserContext`
+built from the current user:
 
 ```csharp
-public class MyUserProvider : IUserProvider
+public class MyUserContextAccessor(IOptimizely optimizely) : IOptimizelyUserContextAccessor
 {
-    public Task<(string userId, UserAttributes? userAttributes)> GetUser() =>
-        Task.FromResult(("user-123", new UserAttributes { ["plan"] = "premium" }));
+    public ValueTask<OptimizelyUserContext?> GetUserContextAsync(CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult(optimizely.CreateUserContext(
+            "user-123",
+            new UserAttributes { ["plan"] = "premium" }
+        ));
 }
 
-builder.Services.AddOptimizelyFeatureDefinitionProvider<MyUserProvider>(options =>
-{
-    options.SdkKey = "your-sdk-key";
-});
+builder.Services.AddScoped<IOptimizelyUserContextAccessor, MyUserContextAccessor>();
 ```
 
-If your application always evaluates for the same user (or you supply the user context yourself),
-you can use the non-generic overload and skip `IUserProvider`.
+If your application always evaluates for the same user (or you pass an `OptimizelyUserContext` to
+`IsEnabledAsync` yourself), you can skip the accessor; features are then evaluated for the configured
+`DefaultUserId`.
 
 ## Use feature flags
 

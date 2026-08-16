@@ -50,33 +50,39 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddOptimizelyFeatureDefinitionProvider_GenericOverloadRegistersUserProviderAsScoped()
+    public void AddOptimizelyFeatureDefinitionProvider_RegistersDefaultUserContextAccessorAsScoped()
     {
         var services = new ServiceCollection();
 
-        services.AddOptimizelyFeatureDefinitionProvider<FakeUserProvider>(options =>
-            options.SdkKey = "test"
-        );
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
 
-        var descriptor = Assert.Single(services, d => d.ServiceType == typeof(IUserProvider));
+        var descriptor = Assert.Single(
+            services,
+            d => d.ServiceType == typeof(IOptimizelyUserContextAccessor)
+        );
         Assert.Equal(ServiceLifetime.Scoped, descriptor.Lifetime);
-        Assert.Equal(typeof(FakeUserProvider), descriptor.ImplementationType);
     }
 
     [Fact]
-    public void AddOptimizelyFeatureFilter_RegistersOptimizelyFilter()
+    public void AddOptimizelyFeatureFilter_RegistersOptimizelyFilters()
     {
         var services = new ServiceCollection();
 
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
-        var descriptor = Assert.Single(
-            services,
-            d =>
-                d.ServiceType == typeof(IFeatureFilterMetadata)
-                && d.ImplementationType == typeof(OptimizelyFeatureFilter)
+        var descriptors = services
+            .Where(d => d.ServiceType == typeof(IFeatureFilterMetadata))
+            .ToList();
+
+        Assert.Contains(
+            descriptors,
+            d => d.ImplementationType == typeof(OptimizelyFeatureFilter)
         );
-        Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime);
+        Assert.Contains(
+            descriptors,
+            d => d.ImplementationType == typeof(OptimizelyContextualFeatureFilter)
+        );
+        Assert.All(descriptors, d => Assert.Equal(ServiceLifetime.Singleton, d.Lifetime));
     }
 
     [Fact]
@@ -100,10 +106,15 @@ public class ServiceCollectionExtensionsTests
     public async Task FeatureManagementPipeline_EvaluatesOptimizelyFeatures()
     {
         var services = new ServiceCollection();
-        services.AddOptimizelyFeatureDefinitionProvider<FakeUserProvider>(options =>
-            options.SdkKey = "test"
-        );
         services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddSingleton<IOptimizelyUserContextAccessor>(
+            (serviceProvider) =>
+                new FakeUserContextAccessor(serviceProvider.GetRequiredService<IOptimizely>())
+                {
+                    Result = ("user1", null),
+                }
+        );
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
         await using var provider = services.BuildServiceProvider();
@@ -114,13 +125,18 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public async Task FeatureManagementPipeline_WithScopedUserProvider_PassesScopeValidation()
+    public async Task FeatureManagementPipeline_WithScopedUserContextAccessor_PassesScopeValidation()
     {
         var services = new ServiceCollection();
-        services.AddOptimizelyFeatureDefinitionProvider<FakeUserProvider>(options =>
-            options.SdkKey = "test"
-        );
         services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddScoped<IOptimizelyUserContextAccessor>(
+            (serviceProvider) =>
+                new FakeUserContextAccessor(serviceProvider.GetRequiredService<IOptimizely>())
+                {
+                    Result = ("user1", null),
+                }
+        );
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
         await using var provider = services.BuildServiceProvider(
@@ -132,11 +148,11 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public async Task FeatureManagementPipeline_WithoutUserProvider_UsesDefaultUser()
+    public async Task FeatureManagementPipeline_WithoutUserContextAccessor_UsesDefaultUser()
     {
         var services = new ServiceCollection();
-        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
         services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
         await using var provider = services.BuildServiceProvider();
@@ -147,14 +163,18 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public async Task FeatureManagementPipeline_CustomUserProviderRegisteredBefore_IsNotShadowedByDefault()
+    public async Task FeatureManagementPipeline_CustomUserContextAccessorRegisteredBefore_IsNotShadowedByDefault()
     {
         var services = new ServiceCollection();
-        services.AddSingleton<IUserProvider>(
-            new FakeUserProvider { Result = ("user2", null) }
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddSingleton<IOptimizelyUserContextAccessor>(
+            (serviceProvider) =>
+                new FakeUserContextAccessor(serviceProvider.GetRequiredService<IOptimizely>())
+                {
+                    Result = ("user2", null),
+                }
         );
         services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
-        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
         await using var provider = services.BuildServiceProvider();
@@ -164,14 +184,18 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public async Task FeatureManagementPipeline_CustomUserProviderRegisteredAfter_IsNotShadowedByDefault()
+    public async Task FeatureManagementPipeline_CustomUserContextAccessorRegisteredAfter_IsNotShadowedByDefault()
     {
         var services = new ServiceCollection();
         services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
-        services.AddSingleton<IUserProvider>(
-            new FakeUserProvider { Result = ("user2", null) }
-        );
         services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddSingleton<IOptimizelyUserContextAccessor>(
+            (serviceProvider) =>
+                new FakeUserContextAccessor(serviceProvider.GetRequiredService<IOptimizely>())
+                {
+                    Result = ("user2", null),
+                }
+        );
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
         await using var provider = services.BuildServiceProvider();
@@ -184,18 +208,38 @@ public class ServiceCollectionExtensionsTests
     public async Task FeatureManagementPipeline_UsesConfiguredDefaultUser()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
         services.AddOptimizelyFeatureDefinitionProvider(options =>
         {
             options.SdkKey = "test";
             options.DefaultUserId = "user2";
         });
-        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
         await using var provider = services.BuildServiceProvider();
         var features = provider.GetRequiredService<IFeatureManager>();
 
         Assert.False(await features.IsEnabledAsync("forced_feature"));
+    }
+
+    [Fact]
+    public async Task FeatureManagementPipeline_EvaluatesFeatureForPassedUserContext()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddOptimizelyFeatureDefinitionProvider(options => options.SdkKey = "test");
+        services.AddFeatureManagement().AddOptimizelyFeatureFilter();
+
+        await using var provider = services.BuildServiceProvider();
+        var features = provider.GetRequiredService<IFeatureManager>();
+        var optimizely = provider.GetRequiredService<IOptimizely>();
+
+        Assert.True(
+            await features.IsEnabledAsync("forced_feature", optimizely.CreateUserContext("user1"))
+        );
+        Assert.False(
+            await features.IsEnabledAsync("forced_feature", optimizely.CreateUserContext("user2"))
+        );
     }
 
     [Fact]

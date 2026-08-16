@@ -94,27 +94,28 @@ builder.Services.AddOptimizelyFeatureDefinitionProvider(options =>
 ## Provide the current user
 
 Optimizely needs to know which user is evaluating the feature so that audiences and targeting rules
-can be applied. Implement `IUserProvider` and register it with the generic overload:
+can be applied. Register an `IOptimizelyUserContextAccessor` that returns an
+`OptimizelyUserContext` built from the current user:
 
 ```csharp
-public class MyUserProvider : IUserProvider
+public class MyUserContextAccessor(IOptimizely optimizely) : IOptimizelyUserContextAccessor
 {
-    public Task<(string userId, UserAttributes? userAttributes)> GetUser() =>
-        Task.FromResult(("user-123", new UserAttributes { ["plan"] = "premium" }));
+    public ValueTask<OptimizelyUserContext?> GetUserContextAsync(CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult(optimizely.CreateUserContext(
+            "user-123",
+            new UserAttributes { ["plan"] = "premium" }
+        ));
 }
 
-builder.Services.AddOptimizelyFeatureDefinitionProvider<MyUserProvider>(options =>
-{
-    options.SdkKey = "your-sdk-key";
-});
+builder.Services.AddScoped<IOptimizelyUserContextAccessor, MyUserContextAccessor>();
 ```
 
-`IUserProvider` is resolved from a DI scope for every evaluation, so a scoped implementation can safely
+The accessor is resolved from a DI scope for every evaluation, so a scoped implementation can safely
 depend on request-scoped services (or on `IHttpContextAccessor` when it needs the current request).
+Return `null` from `GetUserContextAsync` when there is no user; features then evaluate to disabled.
 
-If your application always evaluates for the same user, you can use the non-generic overload and skip
-`IUserProvider`; features are then evaluated for the configured `DefaultUserId`
-(`"anonymous-user"` by default):
+If your application always evaluates for the same user, you can skip registering an accessor; features
+are then evaluated for the configured `DefaultUserId` (`"anonymous-user"` by default):
 
 ```csharp
 builder.Services.AddOptimizelyFeatureDefinitionProvider(options =>
@@ -123,6 +124,24 @@ builder.Services.AddOptimizelyFeatureDefinitionProvider(options =>
     options.DefaultUserId = "shared-user";
 });
 ```
+
+### Evaluate for a specific user
+
+To evaluate a feature for a specific user without an accessor, pass an `OptimizelyUserContext` built
+from your `IOptimizely` instance to `IsEnabledAsync`:
+
+```csharp
+public class ExampleService(IFeatureManager features, IOptimizely optimizely)
+{
+    public Task<bool> IsBetaEnabled(string userId) =>
+        features.IsEnabledAsync("beta_flag", optimizely.CreateUserContext(userId));
+}
+```
+
+`AddOptimizelyFeatureFilter` registers the accessor-based `OptimizelyFeatureFilter` (used when no
+context is passed) and the contextual `OptimizelyContextualFeatureFilter` (used when an
+`OptimizelyUserContext` is passed), both under the `"Optimizely"` alias. The passed context must be
+non-null — create it with `IOptimizely.CreateUserContext` using a valid user id.
 
 ## Usage
 

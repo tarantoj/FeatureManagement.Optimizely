@@ -8,7 +8,7 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 
 internal sealed class OptimizelyVariantServiceProvider<TService>(
     string featureName,
-    IOptimizely optimizely,
+    IOptimizelyUserContextAccessor userContextAccessor,
     ILogger<OptimizelyVariantServiceProvider<TService>> logger,
     IServiceProvider serviceProvider
 ) : IVariantServiceProvider<TService>
@@ -16,12 +16,14 @@ internal sealed class OptimizelyVariantServiceProvider<TService>(
 {
     public async ValueTask<TService> GetServiceAsync(CancellationToken cancellationToken)
     {
-        OptimizelyDecision? decision = await OptimizelyDecisionService.DecideAsync(
-            optimizely,
-            serviceProvider,
+        OptimizelyUserContext? userContext = await userContextAccessor
+            .GetUserContextAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        OptimizelyDecision? decision = OptimizelyDecisionService.Decide(
+            userContext,
             logger,
-            featureName,
-            cancellationToken
+            featureName
         );
 
         TService? service = decision?.VariationKey is { } variationKey

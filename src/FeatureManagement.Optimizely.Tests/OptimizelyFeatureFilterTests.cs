@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.FeatureManagement;
+using OptimizelySDK;
 using OptimizelySDK.Entity;
 using Xunit;
 
@@ -29,7 +30,7 @@ public class OptimizelyFeatureFilterTests
     }
 
     [Fact]
-    public async Task EvaluateAsync_UsesTheUserIdFromTheUserProvider()
+    public async Task EvaluateAsync_UsesTheUserIdFromTheUserContextAccessor()
     {
         var enabledForUser1 = await Evaluate(userId: "user1", feature: "forced_feature");
         var enabledForUser2 = await Evaluate(userId: "user2", feature: "forced_feature");
@@ -39,7 +40,7 @@ public class OptimizelyFeatureFilterTests
     }
 
     [Fact]
-    public async Task EvaluateAsync_PassesUserAttributesFromTheUserProvider()
+    public async Task EvaluateAsync_PassesUserAttributesFromTheUserContextAccessor()
     {
         var premiumUser = await Evaluate(
             userId: "anyone",
@@ -53,7 +54,7 @@ public class OptimizelyFeatureFilterTests
     }
 
     [Fact]
-    public async Task EvaluateAsync_ReturnsFalseWhenUserIdIsNull()
+    public async Task EvaluateAsync_ReturnsFalseWhenNoUserContextIsAvailable()
     {
         var filter = CreateFilter(userId: null!);
 
@@ -74,15 +75,19 @@ public class OptimizelyFeatureFilterTests
     )
     {
         var services = new ServiceCollection();
-        services.AddSingleton<IUserProvider>(
-            new FakeUserProvider { Result = (userId, attributes) }
+        services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
+        services.AddSingleton<IOptimizelyUserContextAccessor>(
+            (serviceProvider) =>
+                new FakeUserContextAccessor(serviceProvider.GetRequiredService<IOptimizely>())
+                {
+                    Result = (userId, attributes),
+                }
         );
         var serviceProvider = services.BuildServiceProvider();
 
         return new OptimizelyFeatureFilter(
-            TestDataFile.CreateOptimizely(),
-            NullLogger<OptimizelyFeatureFilter>.Instance,
-            serviceProvider
+            serviceProvider,
+            NullLogger<OptimizelyFeatureFilter>.Instance
         );
     }
 
@@ -90,10 +95,14 @@ public class OptimizelyFeatureFilterTests
         new() { FeatureName = featureName };
 }
 
-internal sealed class FakeUserProvider : IUserProvider
+internal sealed class FakeUserContextAccessor(IOptimizely optimizely) : IOptimizelyUserContextAccessor
 {
     public (string UserId, UserAttributes? Attributes) Result { get; init; } = ("user1", null);
 
-    public Task<(string userId, UserAttributes? userAttributes)> GetUser() =>
-        Task.FromResult((Result.UserId, Result.Attributes));
+    public ValueTask<OptimizelyUserContext?> GetUserContextAsync(
+        CancellationToken cancellationToken = default
+    ) =>
+        ValueTask.FromResult<OptimizelyUserContext?>(
+            optimizely.CreateUserContext(Result.UserId, Result.Attributes)
+        );
 }

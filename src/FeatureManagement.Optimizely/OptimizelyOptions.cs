@@ -11,12 +11,12 @@ public class OptimizelyOptions
     /// Your Optimizely sdk key. Supplied to <see cref="OptimizelySDK.OptimizelyFactory.NewDefaultInstance(string)"/>.
     /// </summary>
     [Required]
-    public string SdkKey { get; init; } = string.Empty;
+    public string SdkKey { get; set; } = string.Empty;
 
     /// <summary>
     /// Enables or disables logging using
     /// <see cref="Microsoft.Extensions.Logging.ILogger"/>,
     /// enabled by default.
     /// </summary>
-    public bool Logging { get; init; } = true;
+    public bool Logging { get; set; } = true;
 }

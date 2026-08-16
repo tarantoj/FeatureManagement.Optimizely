@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using JetBrains.Annotations;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
 
 /// <summary>
 /// Optimizely configuration options
 /// </summary>
+[PublicAPI]
 public class OptimizelyOptions
 {
     /// <summary>

@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using OptimizelySDK;
 
@@ -7,6 +8,7 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 /// An adapter between <see cref="OptimizelySDK.Logger"/> and <see cref="ILogger"/>
 /// </summary>
 /// <param name="logger">A logger instance</param>
+[PublicAPI]
 public class LoggerAdapter(ILogger<IOptimizely>? logger) : OptimizelySDK.Logger.ILogger
 {
     /// <inheritdoc/>

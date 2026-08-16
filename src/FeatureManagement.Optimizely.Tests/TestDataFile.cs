@@ -10,7 +10,7 @@ internal static class TestDataFile
     private const string ResourceName =
         "TarantoJ.FeatureManagement.Optimizely.Tests.TestData.datafile.json";
 
-    public static readonly string Json;
+    private static readonly string Json;
 
     static TestDataFile()
     {
@@ -23,7 +23,7 @@ internal static class TestDataFile
     }
 
     public static OptimizelySDK.Optimizely CreateOptimizely() =>
-        new OptimizelySDK.Optimizely(
+        new(
             Json,
             eventDispatcher: new NoOpEventDispatcher(),
             skipJsonValidation: true

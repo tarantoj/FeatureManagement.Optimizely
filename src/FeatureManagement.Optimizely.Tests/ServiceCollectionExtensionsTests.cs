@@ -89,7 +89,7 @@ public class ServiceCollectionExtensionsTests
         services.AddSingleton<IOptimizely>(TestDataFile.CreateOptimizely());
         services.AddFeatureManagement().AddOptimizelyFeatureFilter();
 
-        using var provider = services.BuildServiceProvider();
+        await using var provider = services.BuildServiceProvider();
         var features = provider.GetRequiredService<IFeatureManager>();
 
         Assert.True(await features.IsEnabledAsync("boolean_feature"));

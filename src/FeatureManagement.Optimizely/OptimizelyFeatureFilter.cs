@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
@@ -11,6 +12,7 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 /// <param name="logger">A logger instance</param>
 /// <param name="userProvider">An instance of <see cref="IUserProvider"/></param>
 [FilterAlias(Alias)]
+[PublicAPI]
 public class OptimizelyFeatureFilter(
     IOptimizely optimizely,
     ILogger<OptimizelyFeatureFilter> logger,

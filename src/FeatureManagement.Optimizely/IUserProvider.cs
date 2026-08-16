@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using OptimizelySDK.Entity;
 
 namespace TarantoJ.FeatureManagement.Optimizely;
@@ -5,6 +6,7 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 /// <summary>
 /// A provider of user information
 /// </summary>
+[PublicAPI]
 public interface IUserProvider
 {
     /// <summary>

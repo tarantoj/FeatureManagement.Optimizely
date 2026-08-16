@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Microsoft.FeatureManagement;
 using OptimizelySDK;
 
@@ -7,6 +8,7 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 /// Optimizely feature definition provider
 /// </summary>
 /// <param name="optimizely">An instance of Optimizely</param>
+[PublicAPI]
 public class OptimizelyFeatureDefinitionProvider(IOptimizely optimizely)
     : IFeatureDefinitionProvider
 {

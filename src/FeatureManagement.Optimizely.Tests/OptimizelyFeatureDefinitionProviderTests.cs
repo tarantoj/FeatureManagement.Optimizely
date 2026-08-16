@@ -13,7 +13,7 @@ public class OptimizelyFeatureDefinitionProviderTests
         var definitions = await ToListAsync(provider.GetAllFeatureDefinitionsAsync());
 
         Assert.Equal(
-            new[] { "boolean_feature", "empty_feature", "premium_feature", "forced_feature" },
+            ["boolean_feature", "empty_feature", "premium_feature", "forced_feature"],
             definitions.Select(d => d.Name)
         );
         Assert.All(definitions, definition =>
@@ -32,7 +32,7 @@ public class OptimizelyFeatureDefinitionProviderTests
         var definition = await provider.GetFeatureDefinitionAsync("empty_feature");
 
         Assert.NotNull(definition);
-        Assert.Equal("empty_feature", definition!.Name);
+        Assert.Equal("empty_feature", definition.Name);
         Assert.Equal(RequirementType.All, definition.RequirementType);
     }
 

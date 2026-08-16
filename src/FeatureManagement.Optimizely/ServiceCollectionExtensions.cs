@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
@@ -9,6 +10,7 @@ namespace TarantoJ.FeatureManagement.Optimizely;
 /// <summary>
 /// Extensions used to add Optimizely feature management functionality
 /// </summary>
+[PublicAPI]
 public static class ServiceCollectionExtensions
 {
     /// <summary>
@@ -62,13 +64,13 @@ public static class ServiceCollectionExtensions
                 var options = serviceProvider
                     .GetRequiredService<IOptions<OptimizelyOptions>>()
                     .Value;
-                if (options?.Logging ?? false)
+                if (options.Logging)
                 {
                     var logger = serviceProvider.GetRequiredService<LoggerAdapter>();
                     OptimizelyFactory.SetLogger(logger);
                 }
 
-                return OptimizelyFactory.NewDefaultInstance(options?.SdkKey);
+                return OptimizelyFactory.NewDefaultInstance(options.SdkKey);
             }
         );
 
